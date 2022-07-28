@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>LUT-Baker</AssemblyName>
+    <Authors>null511</Authors>
+    <Company />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="LuaScripts\GLSL.lua" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="LuaScripts\GLSL.lua" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="NLua" Version="1.6.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
+  </ItemGroup>
+
+</Project>
