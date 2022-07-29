@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.Numerics;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,15 +13,13 @@ namespace LuaLUT.Internal.Writing
 
         public override async Task ProcessAsync(string luaScript, int width, int height, CancellationToken token = default)
         {
-            await using var binaryWriter = new BinaryWriter(Stream, Encoding.UTF8, true);
-
             // TODO: make row processing parallel, but keep writing synchronous
             for (var y = 0; y < height; y++) {
                 var rowSpan = new Vector4[width];
                 ProcessRow(luaScript, width, height, y, rowSpan.AsSpan());
 
                 foreach (var pixel in rowSpan)
-                    WritePixel(binaryWriter, pixel);
+                    WritePixel(pixel);
             }
         }
 
@@ -46,205 +44,293 @@ namespace LuaLUT.Internal.Writing
             }
         }
 
-        private void WritePixel(BinaryWriter binaryWriter, in Vector4 pixel)
+        private void WritePixel(in Vector4 pixel)
         {
             switch (PixelType) {
-                case PixelType.BYTE:
+                case PixelType.BYTE: {
                     switch (PixelFormat) {
                         case PixelFormat.R_NORM:
-                            binaryWriter.Write((sbyte)(pixel.X * sbyte.MaxValue));
+                            WriteByte_Norm(pixel.X);
                             break;
                         case PixelFormat.RG_NORM:
-                            binaryWriter.Write((sbyte)(pixel.X * sbyte.MaxValue));
-                            binaryWriter.Write((sbyte)(pixel.Y * sbyte.MaxValue));
+                            WriteByte_Norm(pixel.X);
+                            WriteByte_Norm(pixel.Y);
                             break;
                         case PixelFormat.RGB_NORM:
-                            binaryWriter.Write((sbyte)(pixel.X * sbyte.MaxValue));
-                            binaryWriter.Write((sbyte)(pixel.Y * sbyte.MaxValue));
-                            binaryWriter.Write((sbyte)(pixel.Z * sbyte.MaxValue));
+                            WriteByte_Norm(pixel.X);
+                            WriteByte_Norm(pixel.Y);
+                            WriteByte_Norm(pixel.Z);
                             break;
                         case PixelFormat.RGBA_NORM:
-                            binaryWriter.Write((sbyte)(pixel.X * sbyte.MaxValue));
-                            binaryWriter.Write((sbyte)(pixel.Y * sbyte.MaxValue));
-                            binaryWriter.Write((sbyte)(pixel.Z * sbyte.MaxValue));
-                            binaryWriter.Write((sbyte)(pixel.W * sbyte.MaxValue));
+                            WriteByte_Norm(pixel.X);
+                            WriteByte_Norm(pixel.Y);
+                            WriteByte_Norm(pixel.Z);
+                            WriteByte_Norm(pixel.W);
                             break;
                         default:
                             throw new ApplicationException("Unsupported");
                     }
+
                     break;
-                case PixelType.SHORT:
+                }
+                case PixelType.SHORT: {
+                    var buffer = new byte[sizeof(short)];
                     switch (PixelFormat) {
                         case PixelFormat.R_NORM:
-                            binaryWriter.Write((short)(pixel.X * short.MaxValue));
+                            WriteShort_Norm(buffer, pixel.X);
                             break;
                         case PixelFormat.RG_NORM:
-                            binaryWriter.Write((short)(pixel.X * short.MaxValue));
-                            binaryWriter.Write((short)(pixel.Y * short.MaxValue));
+                            WriteShort_Norm(buffer, pixel.X);
+                            WriteShort_Norm(buffer, pixel.Y);
                             break;
                         case PixelFormat.RGB_NORM:
-                            binaryWriter.Write((short)(pixel.X * short.MaxValue));
-                            binaryWriter.Write((short)(pixel.Y * short.MaxValue));
-                            binaryWriter.Write((short)(pixel.Z * short.MaxValue));
+                            WriteShort_Norm(buffer, pixel.X);
+                            WriteShort_Norm(buffer, pixel.Y);
+                            WriteShort_Norm(buffer, pixel.Z);
                             break;
                         case PixelFormat.RGBA_NORM:
-                            binaryWriter.Write((short)(pixel.X * short.MaxValue));
-                            binaryWriter.Write((short)(pixel.Y * short.MaxValue));
-                            binaryWriter.Write((short)(pixel.Z * short.MaxValue));
-                            binaryWriter.Write((short)(pixel.W * short.MaxValue));
+                            WriteShort_Norm(buffer, pixel.X);
+                            WriteShort_Norm(buffer, pixel.Y);
+                            WriteShort_Norm(buffer, pixel.Z);
+                            WriteShort_Norm(buffer, pixel.W);
                             break;
                         default:
                             throw new ApplicationException("Unsupported");
                     }
+
                     break;
-                case PixelType.INT:
+                }
+                case PixelType.INT: {
+                    var buffer = new byte[sizeof(int)];
                     switch (PixelFormat) {
                         case PixelFormat.R_NORM:
-                            binaryWriter.Write((int)(pixel.X * int.MaxValue));
+                            WriteInt_Norm(buffer, pixel.X);
                             break;
                         case PixelFormat.RG_NORM:
-                            binaryWriter.Write((int)(pixel.X * int.MaxValue));
-                            binaryWriter.Write((int)(pixel.Y * int.MaxValue));
+                            WriteInt_Norm(buffer, pixel.X);
+                            WriteInt_Norm(buffer, pixel.Y);
                             break;
                         case PixelFormat.RGB_NORM:
-                            binaryWriter.Write((int)(pixel.X * int.MaxValue));
-                            binaryWriter.Write((int)(pixel.Y * int.MaxValue));
-                            binaryWriter.Write((int)(pixel.Z * int.MaxValue));
+                            WriteInt_Norm(buffer, pixel.X);
+                            WriteInt_Norm(buffer, pixel.Y);
+                            WriteInt_Norm(buffer, pixel.Z);
                             break;
                         case PixelFormat.RGBA_NORM:
-                            binaryWriter.Write((int)(pixel.X * int.MaxValue));
-                            binaryWriter.Write((int)(pixel.Y * int.MaxValue));
-                            binaryWriter.Write((int)(pixel.Z * int.MaxValue));
-                            binaryWriter.Write((int)(pixel.W * int.MaxValue));
+                            WriteInt_Norm(buffer, pixel.X);
+                            WriteInt_Norm(buffer, pixel.Y);
+                            WriteInt_Norm(buffer, pixel.Z);
+                            WriteInt_Norm(buffer, pixel.W);
                             break;
                         default:
                             throw new ApplicationException("Unsupported");
                     }
+
                     break;
-                case PixelType.UNSIGNED_BYTE:
+                }
+                case PixelType.UNSIGNED_BYTE: {
                     switch (PixelFormat) {
                         case PixelFormat.R_NORM:
-                            binaryWriter.Write((byte)(pixel.X * byte.MaxValue));
+                            WriteUByte_Norm(pixel.X);
                             break;
                         case PixelFormat.RG_NORM:
-                            binaryWriter.Write((byte)(pixel.X * byte.MaxValue));
-                            binaryWriter.Write((byte)(pixel.Y * byte.MaxValue));
+                            WriteUByte_Norm(pixel.X);
+                            WriteUByte_Norm(pixel.Y);
                             break;
                         case PixelFormat.RGB_NORM:
-                            binaryWriter.Write((byte)(pixel.X * byte.MaxValue));
-                            binaryWriter.Write((byte)(pixel.Y * byte.MaxValue));
-                            binaryWriter.Write((byte)(pixel.Z * byte.MaxValue));
+                            WriteUByte_Norm(pixel.X);
+                            WriteUByte_Norm(pixel.Y);
+                            WriteUByte_Norm(pixel.Z);
                             break;
                         case PixelFormat.RGBA_NORM:
-                            binaryWriter.Write((byte)(pixel.X * byte.MaxValue));
-                            binaryWriter.Write((byte)(pixel.Y * byte.MaxValue));
-                            binaryWriter.Write((byte)(pixel.Z * byte.MaxValue));
-                            binaryWriter.Write((byte)(pixel.W * byte.MaxValue));
+                            WriteUByte_Norm(pixel.X);
+                            WriteUByte_Norm(pixel.Y);
+                            WriteUByte_Norm(pixel.Z);
+                            WriteUByte_Norm(pixel.W);
                             break;
                         default:
                             throw new ApplicationException("Unsupported");
                     }
+
                     break;
-                case PixelType.UNSIGNED_SHORT:
+                }
+                case PixelType.UNSIGNED_SHORT: {
+                    var buffer = new byte[sizeof(ushort)];
                     switch (PixelFormat) {
                         case PixelFormat.R_NORM:
-                            binaryWriter.Write((ushort)(pixel.X * ushort.MaxValue));
+                            WriteUShort_Norm(buffer, pixel.X);
                             break;
                         case PixelFormat.RG_NORM:
-                            binaryWriter.Write((ushort)(pixel.X * ushort.MaxValue));
-                            binaryWriter.Write((ushort)(pixel.Y * ushort.MaxValue));
+                            WriteUShort_Norm(buffer, pixel.X);
+                            WriteUShort_Norm(buffer, pixel.Y);
                             break;
                         case PixelFormat.RGB_NORM:
-                            binaryWriter.Write((ushort)(pixel.X * ushort.MaxValue));
-                            binaryWriter.Write((ushort)(pixel.Y * ushort.MaxValue));
-                            binaryWriter.Write((ushort)(pixel.Z * ushort.MaxValue));
+                            WriteUShort_Norm(buffer, pixel.X);
+                            WriteUShort_Norm(buffer, pixel.Y);
+                            WriteUShort_Norm(buffer, pixel.Z);
                             break;
                         case PixelFormat.RGBA_NORM:
-                            binaryWriter.Write((ushort)(pixel.X * ushort.MaxValue));
-                            binaryWriter.Write((ushort)(pixel.Y * ushort.MaxValue));
-                            binaryWriter.Write((ushort)(pixel.Z * ushort.MaxValue));
-                            binaryWriter.Write((ushort)(pixel.W * ushort.MaxValue));
+                            WriteUShort_Norm(buffer, pixel.X);
+                            WriteUShort_Norm(buffer, pixel.Y);
+                            WriteUShort_Norm(buffer, pixel.Z);
+                            WriteUShort_Norm(buffer, pixel.W);
                             break;
                         default:
                             throw new ApplicationException("Unsupported");
                     }
+
                     break;
-                case PixelType.UNSIGNED_INT:
+                }
+                case PixelType.UNSIGNED_INT: {
+                    var buffer = new byte[sizeof(uint)];
                     switch (PixelFormat) {
                         case PixelFormat.R_NORM:
-                            binaryWriter.Write((uint)(pixel.X * uint.MaxValue));
+                            WriteUInt_Norm(buffer, pixel.X);
                             break;
                         case PixelFormat.RG_NORM:
-                            binaryWriter.Write((uint)(pixel.X * uint.MaxValue));
-                            binaryWriter.Write((uint)(pixel.Y * uint.MaxValue));
+                            WriteUInt_Norm(buffer, pixel.X);
+                            WriteUInt_Norm(buffer, pixel.Y);
                             break;
                         case PixelFormat.RGB_NORM:
-                            binaryWriter.Write((uint)(pixel.X * uint.MaxValue));
-                            binaryWriter.Write((uint)(pixel.Y * uint.MaxValue));
-                            binaryWriter.Write((uint)(pixel.Z * uint.MaxValue));
+                            WriteUInt_Norm(buffer, pixel.X);
+                            WriteUInt_Norm(buffer, pixel.Y);
+                            WriteUInt_Norm(buffer, pixel.Z);
                             break;
                         case PixelFormat.RGBA_NORM:
-                            binaryWriter.Write((uint)(pixel.X * uint.MaxValue));
-                            binaryWriter.Write((uint)(pixel.Y * uint.MaxValue));
-                            binaryWriter.Write((uint)(pixel.Z * uint.MaxValue));
-                            binaryWriter.Write((uint)(pixel.W * uint.MaxValue));
+                            WriteUInt_Norm(buffer, pixel.X);
+                            WriteUInt_Norm(buffer, pixel.Y);
+                            WriteUInt_Norm(buffer, pixel.Z);
+                            WriteUInt_Norm(buffer, pixel.W);
                             break;
                         default:
                             throw new ApplicationException("Unsupported");
                     }
+
                     break;
-                //case PixelType.HALF_FLOAT:
-                //    switch (PixelFormat) {
-                //        case PixelFormat.R_NORM:
-                //            var bytes = Half.GetBytes((Half)pixel[0]);
-                //            binaryWriter.Write();
-                //            break;
-                //        case PixelFormat.RG_NORM:
-                //            binaryWriter.Write((float)pixel[0]);
-                //            binaryWriter.Write((float)pixel[1]);
-                //            break;
-                //        case PixelFormat.RGB_NORM:
-                //            binaryWriter.Write((float)pixel[0]);
-                //            binaryWriter.Write((float)pixel[1]);
-                //            binaryWriter.Write((float)pixel[2]);
-                //            break;
-                //        case PixelFormat.RGBA_NORM:
-                //            binaryWriter.Write((float)pixel[0]);
-                //            binaryWriter.Write((float)pixel[1]);
-                //            binaryWriter.Write((float)pixel[2]);
-                //            binaryWriter.Write((float)pixel[3]);
-                //            break;
-                //        default:
-                //            throw new ApplicationException("Unsupported");
-                //    }
-                //    break;
-                case PixelType.FLOAT:
+                }
+                case PixelType.HALF_FLOAT: {
+                    var buffer = new byte[2]; //[sizeof(Half)];
                     switch (PixelFormat) {
                         case PixelFormat.R_NORM:
-                            binaryWriter.Write(pixel.X);
+                            WriteHalfFloat(buffer, in pixel.X);
                             break;
                         case PixelFormat.RG_NORM:
-                            binaryWriter.Write(pixel.X);
-                            binaryWriter.Write(pixel.Y);
+                            WriteHalfFloat(buffer, in pixel.X);
+                            WriteHalfFloat(buffer, in pixel.Y);
                             break;
                         case PixelFormat.RGB_NORM:
-                            binaryWriter.Write(pixel.X);
-                            binaryWriter.Write(pixel.Y);
-                            binaryWriter.Write(pixel.Z);
+                            WriteHalfFloat(buffer, in pixel.X);
+                            WriteHalfFloat(buffer, in pixel.Y);
+                            WriteHalfFloat(buffer, in pixel.Z);
                             break;
                         case PixelFormat.RGBA_NORM:
-                            binaryWriter.Write(pixel.X);
-                            binaryWriter.Write(pixel.Y);
-                            binaryWriter.Write(pixel.Z);
-                            binaryWriter.Write(pixel.W);
+                            WriteHalfFloat(buffer, in pixel.X);
+                            WriteHalfFloat(buffer, in pixel.Y);
+                            WriteHalfFloat(buffer, in pixel.Z);
+                            WriteHalfFloat(buffer, in pixel.W);
                             break;
                         default:
                             throw new ApplicationException("Unsupported");
                     }
+
                     break;
+                }
+                case PixelType.FLOAT: {
+                    var buffer = new byte[sizeof(float)];
+                    switch (PixelFormat) {
+                        case PixelFormat.R_NORM:
+                            WriteFloat(buffer, in pixel.X);
+                            break;
+                        case PixelFormat.RG_NORM:
+                            WriteFloat(buffer, in pixel.X);
+                            WriteFloat(buffer, in pixel.Y);
+                            break;
+                        case PixelFormat.RGB_NORM:
+                            WriteFloat(buffer, in pixel.X);
+                            WriteFloat(buffer, in pixel.Y);
+                            WriteFloat(buffer, in pixel.Z);
+                            break;
+                        case PixelFormat.RGBA_NORM:
+                            WriteFloat(buffer, in pixel.X);
+                            WriteFloat(buffer, in pixel.Y);
+                            WriteFloat(buffer, in pixel.Z);
+                            WriteFloat(buffer, in pixel.W);
+                            break;
+                        default:
+                            throw new ApplicationException("Unsupported");
+                    }
+
+                    break;
+                }
                 default:
                     throw new ApplicationException("Unsupported");
             }
         }
+
+        #region Raw Writers
+
+        private void WriteByte(in sbyte value) =>
+            throw new NotImplementedException();
+
+        private void WriteUByte(in byte value) =>
+            Stream.WriteByte(value);
+
+        private void WriteShort(in Span<byte> buffer, in short value)
+        {
+            BinaryPrimitives.WriteInt16BigEndian(buffer, value);
+            Stream.Write(buffer);
+        }
+
+        private void WriteUShort(in Span<byte> buffer, in ushort value)
+        {
+            BinaryPrimitives.WriteUInt16BigEndian(buffer, value);
+            Stream.Write(buffer);
+        }
+
+        private void WriteInt(in Span<byte> buffer, in int value)
+        {
+            BinaryPrimitives.WriteInt32BigEndian(buffer, value);
+            Stream.Write(buffer);
+        }
+
+        private void WriteUInt(in Span<byte> buffer, in uint value)
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(buffer, value);
+            Stream.Write(buffer);
+        }
+ 
+        private void WriteHalfFloat(in Span<byte> buffer, in float value)
+        {
+            throw new NotImplementedException();
+        }
+ 
+        private void WriteFloat(in Span<byte> buffer, in float value)
+        {
+            BinaryPrimitives.WriteSingleBigEndian(buffer, value);
+            Stream.Write(buffer);
+        }
+
+        #endregion
+
+        #region Normalized Writers
+
+        private void WriteByte_Norm(in float normValue) =>
+            WriteByte((sbyte)Math.Clamp(normValue * sbyte.MaxValue, sbyte.MinValue, sbyte.MaxValue));
+
+        private void WriteUByte_Norm(in float normValue) =>
+            WriteUByte((byte)Math.Clamp(normValue * byte.MaxValue, byte.MinValue, byte.MaxValue));
+
+        private void WriteShort_Norm(in Span<byte> buffer, in float normValue) =>
+            WriteShort(in buffer, (short)Math.Clamp(normValue * short.MaxValue, short.MinValue, short.MaxValue));
+
+        private void WriteUShort_Norm(in Span<byte> buffer, in float normValue) =>
+            WriteUShort(in buffer, (ushort)Math.Clamp(normValue * ushort.MaxValue, ushort.MinValue, ushort.MaxValue));
+
+        private void WriteInt_Norm(in Span<byte> buffer, in float normValue) =>
+            WriteInt(in buffer, (int)Math.Clamp(normValue * int.MaxValue, int.MinValue, int.MaxValue));
+
+        private void WriteUInt_Norm(in Span<byte> buffer, in float normValue) =>
+            WriteUInt(in buffer, (uint)Math.Clamp(normValue * uint.MaxValue, uint.MinValue, uint.MaxValue));
+
+        #endregion
     }
 }

@@ -26,10 +26,10 @@ namespace LuaLUT.Internal
         [Option('h', "height", Required = true, HelpText = "The height of the LUT image to generate.")]
         public int ImageHeight { get; set; }
 
-        [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
-        public bool Verbose { get; set; }
-
-        [Option("var", Required = false, Separator = ';', HelpText = "An optional list of variables.")]
+        [Option('v', "var", Required = false, Separator = ';', HelpText = "An optional list of variables.")]
         public IEnumerable<string> CustomVariables { get; set; }
+
+        [Option("verbose", Required = false, HelpText = "Set output to verbose messages.")]
+        public bool Verbose { get; set; }
     }
 }

@@ -48,7 +48,11 @@ namespace LuaLUT
                         var i = part.IndexOf('=');
                         if (i < 0) throw new ApplicationException($"Failed to parse variable '{part}'!");
 
-                        writer.CustomVariables[part[..i]] = part[(i+1)..];
+                        var varName = part[..i];
+                        var varValue = part[(i+1)..];
+                        writer.CustomVariables[varName] = varValue;
+
+                        if (options.Verbose) Console.WriteLine($"Adding custom variable '{varName}' with value '{varValue}'.");
                     }
                 }
 

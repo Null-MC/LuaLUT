@@ -1,7 +1,8 @@
 {
   "profiles": {
     "LuaLUT": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "-s \"D:\\MC-Shader\\Arc\\tools\\BRDF.lua\" -o \"D:\\MC-Shader\\LUT-Tester\\src\\shaders\\textures\\brdf.dat\" -i RAW -f RG -t UNSIGNED_BYTE -w 128 -h 128 -v \"SAMPLE_COUNT=32\""
     }
   }
 }
