@@ -9,9 +9,7 @@ namespace LutBaker.Internal.Writing
         PixelFormat PixelFormat {get; set;}
         PixelType PixelType {get; set;}
 
-        void Initialize(in int width, in int height);
-        void AppendPixel(int x, int y, double[] pixel);
-        Task CompleteAsync(CancellationToken token = default);
+        Task ProcessAsync(LuaScriptProcessor processor, CancellationToken token = default);
     }
 
     internal abstract class ImageWriterBase : IImageWriter
@@ -27,9 +25,6 @@ namespace LutBaker.Internal.Writing
             Stream = stream;
         }
 
-        public abstract void AppendPixel(int x, int y, double[] pixel);
-
-        public virtual void Initialize(in int width, in int height) {}
-        public virtual Task CompleteAsync(CancellationToken token = default) => Task.CompletedTask;
+        public abstract Task ProcessAsync(LuaScriptProcessor processor, CancellationToken token = default);
     }
 }

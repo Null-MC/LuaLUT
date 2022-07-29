@@ -10,16 +10,29 @@
 
   <ItemGroup>
     <None Remove="LuaScripts\GLSL.lua" />
+    <None Remove="LuaScripts\GLSL_ops.lua" />
+    <None Remove="LuaScripts\GLSL_vec.lua" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="LuaScripts\GLSL_ops.lua" />
+    <EmbeddedResource Include="LuaScripts\GLSL_vec.lua" />
     <EmbeddedResource Include="LuaScripts\GLSL.lua" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="NLua" Version="1.6.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="test-simple.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="test-brdf.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

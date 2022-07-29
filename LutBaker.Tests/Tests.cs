@@ -14,23 +14,23 @@ namespace LutBaker.Tests
         {
             using var outputStream = new MemoryStream();
 
+            var luaScript = await Assembly.GetExecutingAssembly()
+                .ReadTextAsync("LutBaker.Tests.TestScripts.test1.lua");
+
+            var processor = new LuaScriptProcessor {
+                Script = luaScript,
+                Width = 32,
+                Height = 32,
+            };
+
             var writer = new StandardImageWriter(outputStream, ImageType.Png) {
                 PixelFormat = PixelFormat.RG_NORM,
                 PixelType = PixelType.BYTE,
             };
 
-            var processor = new LuaScriptProcessor {
-                Width = 32,
-                Height = 32,
-            };
+            await processor.InitializeAsync();
 
-            var luaScript = await Assembly.GetExecutingAssembly()
-                .ReadTextAsync("LutBaker.Tests.TestScripts.test1.lua");
-
-            writer.Initialize(32, 32);
-            await processor.BuildAsync(writer, luaScript);
-            await outputStream.FlushAsync();
-            await writer.CompleteAsync();
+            await writer.ProcessAsync(processor);
 
             // TODO: now what?
             // could reset the stream, reload as new PNG, and very left-right is X:red, and up-down is Y:green
@@ -41,24 +41,23 @@ namespace LutBaker.Tests
         {
             using var outputStream = new MemoryStream();
 
+            var luaScript = await Assembly.GetExecutingAssembly()
+                .ReadTextAsync("LutBaker.Tests.TestScripts.test1.lua");
+
+            var processor = new LuaScriptProcessor {
+                Script = luaScript,
+                Width = 32,
+                Height = 32,
+            };
+
             var writer = new RawImageWriter(outputStream) {
                 PixelFormat = PixelFormat.RG_NORM,
                 PixelType = PixelType.BYTE,
             };
 
-            writer.Initialize(32, 32);
+            await processor.InitializeAsync();
 
-            var processor = new LuaScriptProcessor {
-                Width = 32,
-                Height = 32,
-            };
-
-            var luaScript = await Assembly.GetExecutingAssembly()
-                .ReadTextAsync("LutBaker.Tests.TestScripts.test1.lua");
-
-            await processor.BuildAsync(writer, luaScript);
-            await outputStream.FlushAsync();
-            await writer.CompleteAsync();
+            await writer.ProcessAsync(processor);
 
             // TODO: now what?
         }

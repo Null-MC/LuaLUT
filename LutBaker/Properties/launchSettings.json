@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "LutBaker": {
+      "commandName": "Project"
+    },
+    "Test": {
+      "commandName": "Project",
+      "commandLineArgs": "-s \"test-simple.lua\" -o \"LUT.png\" -i \"PNG\" -f \"RGB\" -t \"BYTE\" -w 64 -h 64"
+    }
+  }
+}

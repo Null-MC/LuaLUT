@@ -34,12 +34,15 @@ namespace LutBaker
             if (options.Verbose) Console.WriteLine("Verbose output enabled.");
 
             try {
-                var processor = new LuaScriptProcessor {
+                using var processor = new LuaScriptProcessor {
+                    Script = await File.ReadAllTextAsync(options.ScriptFilename),
                     Width = options.ImageWidth,
                     Height = options.ImageHeight,
                 };
 
-                var luaScript = await File.ReadAllTextAsync(options.ScriptFilename);
+                // TODO: populate custom variables
+                // processor.CustomVariables = ;
+
                 await using var outputStream = File.Open(options.ImageFilename, FileMode.Create, FileAccess.Write);
                 
                 var imageType = ImageTypes.Parse(options.ImageType);
@@ -50,9 +53,9 @@ namespace LutBaker
                 writer.PixelFormat = PixelFormats.Parse(options.PixelFormat);
                 writer.PixelType = PixelTypes.Parse(options.PixelType);
 
-                writer.Initialize(options.ImageWidth, options.ImageHeight);
-                await processor.BuildAsync(writer, luaScript);
-                await writer.CompleteAsync();
+                await processor.InitializeAsync();
+
+                await writer.ProcessAsync(processor);
             }
             catch (Exception error) {
                 Console.WriteLine($"Failed to build LUT! {error.Message}\n{error}");

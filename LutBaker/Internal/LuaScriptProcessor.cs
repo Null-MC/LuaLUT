@@ -1,40 +1,70 @@
-﻿using LutBaker.Internal.Writing;
-using NLua;
+﻿using NLua;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
 namespace LutBaker.Internal
 {
-    internal class LuaScriptProcessor
+    internal class LuaScriptProcessor : IDisposable
     {
+        private readonly Lua context;
+        private LuaFunction processPixelFunc;
+
+        public string Script {get; set;}
         public int Width {get; set;}
         public int Height {get; set;}
+        public Dictionary<string, object> CustomVariables {get; set;}
 
 
-        public async Task BuildAsync(IImageWriter imageWriter, string luaScript)
+        public LuaScriptProcessor()
         {
-            using var luaContext = new Lua();
-            luaContext["width"] = Width;
-            luaContext["height"] = Height;
+            context = new Lua();
+            CustomVariables = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
+        }
 
-            var glslScript = await Assembly.GetExecutingAssembly()
-                .ReadTextAsync("LutBaker.LuaScripts.GLSL.lua");
+        public void Dispose()
+        {
+            context?.Dispose();
+        }
 
-            luaContext.DoString(glslScript);
+        public async Task InitializeAsync()
+        {
+            context["width"] = Width;
+            context["height"] = Height;
 
-            for (var y = 0; y < Height; y++) {
-                luaContext["y"] = y;
+            foreach (var (key, value) in CustomVariables)
+                context[key] = value;
 
-                for (var x = 0; x < Width; x++) {
-                    luaContext["x"] = x;
+            await LoadScriptAsync("GLSL_ops.lua");
+            await LoadScriptAsync("GLSL_vec.lua");
+            await LoadScriptAsync("GLSL.lua");
 
-                    var pixel = luaContext.DoString(luaScript)
-                        .Cast<double>().ToArray();
+            context.DoString(Script);
 
-                    imageWriter.AppendPixel(x, y, pixel);
-                }
+            processPixelFunc = context["processPixel"] as LuaFunction;
+            if (processPixelFunc == null) throw new ApplicationException("Failed to load script! No 'processPixel(x, y)' function found!");
+        }
+
+        public double[] ProcessPixel(int x, int y)
+        {
+            var result = processPixelFunc.Call(x, y);
+
+            if (result.Length == 1 && result[0] is LuaTable resultTable) {
+                return resultTable.Values.OfType<object>()
+                    .Select(Convert.ToDouble).ToArray();
             }
+
+            return result.Select(Convert.ToDouble).ToArray();
+        }
+
+        private async Task LoadScriptAsync(string localPath)
+        {
+            var script = await Assembly.GetExecutingAssembly()
+                .ReadTextAsync($"LutBaker.LuaScripts.{localPath}");
+
+            context.DoString(script);
         }
     }
 }
