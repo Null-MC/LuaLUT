@@ -4,23 +4,41 @@ using System.IO;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace LuaLUT.Internal.Writing
 {
     internal class RawImageWriter : ImageWriterBase
     {
+        private const int MaxDegreeOfParallelism = 8;
+
+
         public RawImageWriter(Stream stream) : base(stream) {}
 
         public override async Task ProcessAsync(string luaScript, int width, int height, CancellationToken token = default)
         {
-            // TODO: make row processing parallel, but keep writing synchronous
-            for (var y = 0; y < height; y++) {
+            var processPixelRowBlock = new TransformBlock<int, Memory<Vector4>>(y => {
                 var rowSpan = new Vector4[width];
                 ProcessRow(luaScript, width, height, y, rowSpan.AsSpan());
+                return rowSpan;
+            }, new ExecutionDataflowBlockOptions {
+                MaxDegreeOfParallelism = MaxDegreeOfParallelism,
+            });
 
-                foreach (var pixel in rowSpan)
+            var writeRowBlock = new ActionBlock<Memory<Vector4>>(row => {
+                foreach (var pixel in row.Span)
                     WritePixel(pixel);
-            }
+            });
+
+            processPixelRowBlock.LinkTo(writeRowBlock, new DataflowLinkOptions {
+                PropagateCompletion = true,
+            });
+
+            for (var y = 0; y < height; y++)
+                processPixelRowBlock.Post(y);
+
+            processPixelRowBlock.Complete();
+            await writeRowBlock.Completion;
         }
 
         private void ProcessRow(string luaScript, int width, int height, int y, Span<Vector4> rowSpan)
@@ -276,25 +294,25 @@ namespace LuaLUT.Internal.Writing
 
         private void WriteShort(in Span<byte> buffer, in short value)
         {
-            BinaryPrimitives.WriteInt16BigEndian(buffer, value);
+            BinaryPrimitives.WriteInt16LittleEndian(buffer, value);
             Stream.Write(buffer);
         }
 
         private void WriteUShort(in Span<byte> buffer, in ushort value)
         {
-            BinaryPrimitives.WriteUInt16BigEndian(buffer, value);
+            BinaryPrimitives.WriteUInt16LittleEndian(buffer, value);
             Stream.Write(buffer);
         }
 
         private void WriteInt(in Span<byte> buffer, in int value)
         {
-            BinaryPrimitives.WriteInt32BigEndian(buffer, value);
+            BinaryPrimitives.WriteInt32LittleEndian(buffer, value);
             Stream.Write(buffer);
         }
 
         private void WriteUInt(in Span<byte> buffer, in uint value)
         {
-            BinaryPrimitives.WriteUInt32BigEndian(buffer, value);
+            BinaryPrimitives.WriteUInt32LittleEndian(buffer, value);
             Stream.Write(buffer);
         }
  
@@ -305,7 +323,14 @@ namespace LuaLUT.Internal.Writing
  
         private void WriteFloat(in Span<byte> buffer, in float value)
         {
-            BinaryPrimitives.WriteSingleBigEndian(buffer, value);
+            //if (float.IsNaN(value)) throw new ApplicationException();
+            BinaryPrimitives.WriteSingleLittleEndian(buffer, float.IsNaN(value) ? 0f : value);
+            Stream.Write(buffer);
+        }
+ 
+        private void WriteDouble(in Span<byte> buffer, in double value)
+        {
+            BinaryPrimitives.WriteDoubleLittleEndian(buffer, value);
             Stream.Write(buffer);
         }
 
@@ -329,7 +354,10 @@ namespace LuaLUT.Internal.Writing
             WriteInt(in buffer, (int)Math.Clamp(normValue * int.MaxValue, int.MinValue, int.MaxValue));
 
         private void WriteUInt_Norm(in Span<byte> buffer, in float normValue) =>
-            WriteUInt(in buffer, (uint)Math.Clamp(normValue * uint.MaxValue, uint.MinValue, uint.MaxValue));
+            WriteUInt(in buffer, (uint)Math.Clamp((double)normValue * uint.MaxValue, uint.MinValue, uint.MaxValue));
+
+        private void WriteDouble_Norm(in Span<byte> buffer, in double normValue) =>
+            WriteDouble(in buffer, Math.Clamp(normValue * double.MaxValue, double.MinValue, double.MaxValue));
 
         #endregion
     }
