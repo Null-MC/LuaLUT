@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32413.511
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LutBaker", "LutBaker\LutBaker.csproj", "{9D560BD7-E68E-4666-AE9C-EF169845F587}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaLUT", "LuaLUT\LuaLUT.csproj", "{9D560BD7-E68E-4666-AE9C-EF169845F587}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LutBaker.Tests", "LutBaker.Tests\LutBaker.Tests.csproj", "{25C23AC0-07EF-4583-B9EF-4827F8D1E4D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaLUT.Tests", "LuaLUT.Tests\LuaLUT.Tests.csproj", "{25C23AC0-07EF-4583-B9EF-4827F8D1E4D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

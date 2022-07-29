@@ -1,4 +1,4 @@
-# LUT-Baker
+# LuaLUT
 A small tool for baking LUT images for Minecraft shaders using Lua scripting.
 
 ## Usage
@@ -15,5 +15,5 @@ end
 You can run LUT-Baker using the following command to generate a LUT.png image.
 
 ```
-lubaker -s "lut.lua" -o "lut.png" -i "PNG" -f "RGB" -t "BYTE" -w 64 -h 64
+lualut -s "lut.lua" -o "lut.png" -i "PNG" -f "RGB" -t "BYTE" -w 128 -h 128
 ```
