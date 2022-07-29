@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using System.Collections.Generic;
 
 namespace LuaLUT.Internal
 {
@@ -28,7 +29,7 @@ namespace LuaLUT.Internal
         [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
         public bool Verbose { get; set; }
 
-        [Option("var", Required = false, HelpText = "An optional list of variables.")]
-        public string CustomVariables { get; set; }
+        [Option("var", Required = false, Separator = ';', HelpText = "An optional list of variables.")]
+        public IEnumerable<string> CustomVariables { get; set; }
     }
 }

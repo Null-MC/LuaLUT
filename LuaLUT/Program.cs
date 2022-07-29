@@ -43,9 +43,13 @@ namespace LuaLUT
                 writer.PixelFormat = PixelFormats.Parse(options.PixelFormat);
                 writer.PixelType = PixelTypes.Parse(options.PixelType);
 
-                if (!string.IsNullOrWhiteSpace(options.CustomVariables)) {
-                    // TODO: Parse custom variables
-                    //writer.CustomVariables = options.CustomVariables;
+                if (options.CustomVariables.Any()) {
+                    foreach (var part in options.CustomVariables) {
+                        var i = part.IndexOf('=');
+                        if (i < 0) throw new ApplicationException($"Failed to parse variable '{part}'!");
+
+                        writer.CustomVariables[part[..i]] = part[(i+1)..];
+                    }
                 }
 
                 await writer.ProcessAsync(luaScript, options.ImageWidth, options.ImageHeight);

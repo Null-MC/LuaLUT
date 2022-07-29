@@ -23,6 +23,8 @@ namespace LuaLUT.Internal.Writing
             using var image = CreateImage(width, height);
 
             image.Mutate(context => {
+                // TODO: if integer format, don't use vec4
+
                 context.ProcessPixelRowsAsVector4((row, point) => {
                     using var processor = new LuaScriptProcessor {
                         CustomVariables = CustomVariables,
@@ -71,6 +73,19 @@ namespace LuaLUT.Internal.Writing
                             return new Image<Rgb24>(Configuration.Default, width, height);
                         case PixelFormat.RGBA_NORM:
                             return new Image<Rgba32>(Configuration.Default, width, height);
+                        default:
+                            throw new ApplicationException("Unsupported");
+                    }
+                case PixelType.HALF_FLOAT:
+                    switch (PixelFormat) {
+                        case PixelFormat.R_NORM:
+                            return new Image<L16>(Configuration.Default, width, height);
+                        case PixelFormat.RG_NORM:
+                            return new Image<Rgb48>(Configuration.Default, width, height);
+                        case PixelFormat.RGB_NORM:
+                            return new Image<Rgb48>(Configuration.Default, width, height);
+                        case PixelFormat.RGBA_NORM:
+                            return new Image<Rgba64>(Configuration.Default, width, height);
                         default:
                             throw new ApplicationException("Unsupported");
                     }

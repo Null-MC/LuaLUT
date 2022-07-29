@@ -8,15 +8,15 @@ namespace LuaLUT.Tests
 {
     public class BrdfTests : TestBase
     {
-        //[Fact]
-        [Fact(Skip = "For manual use only")]
+        [Fact]
+        //[Fact(Skip = "For manual use only")]
         public async Task CanWriteStandard()
         {
             await using var outputStream = File.Open("BRDF.png", FileMode.Create, FileAccess.Write);
 
             var writer = new StandardImageWriter(outputStream, ImageType.Png) {
                 PixelFormat = PixelFormat.RG_NORM,
-                PixelType = PixelType.BYTE,
+                PixelType = PixelType.HALF_FLOAT,
                 CustomVariables = {
                     ["SAMPLE_COUNT"] = 32,
                 },

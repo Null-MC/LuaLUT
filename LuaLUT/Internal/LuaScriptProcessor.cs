@@ -48,7 +48,7 @@ namespace LuaLUT.Internal
             if (processPixelFunc == null) throw new ApplicationException("Failed to load script! No 'processPixel(x, y)' function found!");
         }
 
-        public double[] ProcessPixel(int x, int y)
+        public double[] ProcessPixel(in int x, in int y)
         {
             var result = processPixelFunc.Call(x, y);
 
@@ -58,6 +58,18 @@ namespace LuaLUT.Internal
             }
 
             return result.Select(Convert.ToDouble).ToArray();
+        }
+
+        public long[] ProcessPixelInt(in int x, in int y)
+        {
+            var result = processPixelFunc.Call(x, y);
+
+            if (result.Length == 1 && result[0] is LuaTable resultTable) {
+                return resultTable.Values.OfType<object>()
+                    .Select(Convert.ToInt64).ToArray();
+            }
+
+            return result.Select(Convert.ToInt64).ToArray();
         }
 
         private void LoadScript(string localPath)
