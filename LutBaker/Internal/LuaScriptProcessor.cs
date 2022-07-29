@@ -29,17 +29,18 @@ namespace LutBaker.Internal
             context?.Dispose();
         }
 
-        public async Task InitializeAsync()
+        public void Initialize()
         {
             context["width"] = Width;
             context["height"] = Height;
+            context["PI"] = MathF.PI;
 
             foreach (var (key, value) in CustomVariables)
                 context[key] = value;
 
-            await LoadScriptAsync("GLSL_ops.lua");
-            await LoadScriptAsync("GLSL_vec.lua");
-            await LoadScriptAsync("GLSL.lua");
+            LoadScript("GLSL_ops.lua");
+            LoadScript("GLSL_vec.lua");
+            LoadScript("GLSL.lua");
 
             context.DoString(Script);
 
@@ -57,6 +58,14 @@ namespace LutBaker.Internal
             }
 
             return result.Select(Convert.ToDouble).ToArray();
+        }
+
+        private void LoadScript(string localPath)
+        {
+            var script = Assembly.GetExecutingAssembly()
+                .ReadText($"LutBaker.LuaScripts.{localPath}");
+
+            context.DoString(script);
         }
 
         private async Task LoadScriptAsync(string localPath)

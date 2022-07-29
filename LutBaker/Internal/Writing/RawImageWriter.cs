@@ -8,7 +8,7 @@ namespace LutBaker.Internal.Writing
     {
         public RawImageWriter(Stream stream) : base(stream) {}
 
-        public override async Task ProcessAsync(LuaScriptProcessor processor, CancellationToken token = default)
+        public override async Task ProcessAsync(string luaScript, int width, int height, CancellationToken token = default)
         {
             // TODO
         }

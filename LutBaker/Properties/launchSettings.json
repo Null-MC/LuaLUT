@@ -5,7 +5,7 @@
     },
     "Test": {
       "commandName": "Project",
-      "commandLineArgs": "-s \"test-simple.lua\" -o \"LUT.png\" -i \"PNG\" -f \"RGB\" -t \"BYTE\" -w 64 -h 64"
+      "commandLineArgs": "-s \"test-brdf.lua\" -o \"LUT.png\" -i \"PNG\" -f \"RGB\" -t \"BYTE\" -w 256 -h 256"
     }
   }
 }

@@ -11,7 +11,6 @@ namespace LutBaker.Internal.Writing
     internal class StandardImageWriter : ImageWriterBase
     {
         private readonly ImageType imageType;
-        private Image imageHandle;
 
 
         public StandardImageWriter(Stream stream, ImageType imageType) : base(stream)
@@ -19,13 +18,22 @@ namespace LutBaker.Internal.Writing
             this.imageType = imageType;
         }
 
-        public override async Task ProcessAsync(LuaScriptProcessor processor, CancellationToken token = default)
+        public override async Task ProcessAsync(string luaScript, int width, int height, CancellationToken token = default)
         {
-            imageHandle = CreateImage(processor.Width, processor.Height);
+            using var image = CreateImage(width, height);
 
-            imageHandle.Mutate(context => {
+            image.Mutate(context => {
                 context.ProcessPixelRowsAsVector4((row, point) => {
-                    for (var x = 0; x < imageHandle.Width; x++) {
+                    using var processor = new LuaScriptProcessor {
+                        CustomVariables = CustomVariables,
+                        Script = luaScript,
+                        Width = width,
+                        Height = height,
+                    };
+
+                    processor.Initialize();
+
+                    for (var x = 0; x < width; x++) {
                         var pixel = processor.ProcessPixel(point.X + x, point.Y);
 
                         if (pixel.Length >= 1) row[point.X + x].X = (float)pixel[0];
@@ -40,10 +48,10 @@ namespace LutBaker.Internal.Writing
 
             switch (imageType) {
                 case ImageType.Png:
-                    await imageHandle.SaveAsPngAsync(Stream, token);
+                    await image.SaveAsPngAsync(Stream, token);
                     break;
                 case ImageType.Bmp:
-                    await imageHandle.SaveAsBmpAsync(Stream, token);
+                    await image.SaveAsBmpAsync(Stream, token);
                     break;
                 default:
                     throw new ApplicationException();

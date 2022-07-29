@@ -1,7 +1,5 @@
 ﻿if vec ~= nil then return end
 
---dofile("operatorFunctions.lua")
-
 -------------------------------- swizzles --------------------------------
 
 local swizzles = {

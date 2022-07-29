@@ -27,5 +27,8 @@ namespace LutBaker.Internal
 
         [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
         public bool Verbose { get; set; }
+
+        [Option("var", Required = false, HelpText = "An optional list of variables.")]
+        public string CustomVariables { get; set; }
     }
 }
