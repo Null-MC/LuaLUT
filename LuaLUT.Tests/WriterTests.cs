@@ -1,13 +1,12 @@
-using LutBaker.Internal;
-using LutBaker.Internal.Writing;
+using LuaLUT.Internal.Writing;
+using LuaLUT.Tests.Internal;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace LutBaker.Tests
+namespace LuaLUT.Tests
 {
-    public class Tests
+    public class WriterTests : TestBase
     {
         [Fact]
         public async Task CanWriteStandard()
@@ -19,9 +18,7 @@ namespace LutBaker.Tests
                 PixelType = PixelType.BYTE,
             };
 
-            var luaScript = await Assembly.GetExecutingAssembly()
-                .ReadTextAsync("LutBaker.Tests.TestScripts.test1.lua");
-
+            var luaScript = await LoadScriptAsync("test1.lua");
             await writer.ProcessAsync(luaScript, 32, 32);
 
             // TODO: now what?
@@ -38,9 +35,7 @@ namespace LutBaker.Tests
                 PixelType = PixelType.BYTE,
             };
 
-            var luaScript = await Assembly.GetExecutingAssembly()
-                .ReadTextAsync("LutBaker.Tests.TestScripts.test1.lua");
-
+            var luaScript = await LoadScriptAsync("test1.lua");
             await writer.ProcessAsync(luaScript, 32, 32);
 
             // TODO: now what?

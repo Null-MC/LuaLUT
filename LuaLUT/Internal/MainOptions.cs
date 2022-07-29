@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace LutBaker.Internal
+namespace LuaLUT.Internal
 {
     internal class MainOptions
     {

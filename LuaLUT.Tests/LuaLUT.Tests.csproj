@@ -7,10 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestScripts\brdf-bit.lua" />
+    <None Remove="TestScripts\BRDF.lua" />
+    <None Remove="TestScripts\simple.lua" />
     <None Remove="TestScripts\test1.lua" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="TestScripts\brdf-bit.lua">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestScripts\BRDF.lua" />
+    <EmbeddedResource Include="TestScripts\simple.lua">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="TestScripts\test1.lua" />
   </ItemGroup>
 

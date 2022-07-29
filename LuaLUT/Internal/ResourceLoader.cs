@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace LutBaker.Internal
+namespace LuaLUT.Internal
 {
     internal static class ResourceLoader
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LutBaker.Internal.Writing
+namespace LuaLUT.Internal.Writing
 {
     internal enum ImageType
     {

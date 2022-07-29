@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace LutBaker.Internal
+namespace LuaLUT.Internal
 {
     internal class LuaScriptProcessor : IDisposable
     {
@@ -63,7 +63,7 @@ namespace LutBaker.Internal
         private void LoadScript(string localPath)
         {
             var script = Assembly.GetExecutingAssembly()
-                .ReadText($"LutBaker.LuaScripts.{localPath}");
+                .ReadText($"LuaLUT.LuaScripts.{localPath}");
 
             context.DoString(script);
         }
@@ -71,7 +71,7 @@ namespace LutBaker.Internal
         private async Task LoadScriptAsync(string localPath)
         {
             var script = await Assembly.GetExecutingAssembly()
-                .ReadTextAsync($"LutBaker.LuaScripts.{localPath}");
+                .ReadTextAsync($"LuaLUT.LuaScripts.{localPath}");
 
             context.DoString(script);
         }

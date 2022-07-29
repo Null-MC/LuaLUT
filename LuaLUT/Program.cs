@@ -1,16 +1,13 @@
 ﻿using CommandLine;
-using LutBaker.Internal;
-using LutBaker.Internal.Writing;
+using LuaLUT.Internal;
+using LuaLUT.Internal.Writing;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("LuaLUT.Tests")]
-
-namespace LutBaker
+namespace LuaLUT
 {
     internal class Program
     {

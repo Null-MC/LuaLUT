@@ -1,6 +1,4 @@
-﻿sampleCount = 1024
-
-function VanDerCorput(n, base)
+﻿function VanDerCorput(n, base)
     local invBase = 1.0 / base
     local denom = 1.0
     local result = 0.0
@@ -71,8 +69,8 @@ function processPixel(x, y)
 	local result = vec(0.0, 0.0)
 	local N = vec(0.0, 0.0, 1.0)
 
-	for i = 0,sampleCount,1	do
-		local Xi = Hammersley(i, sampleCount)
+	for i = 0,SAMPLE_COUNT,1	do
+		local Xi = Hammersley(i, SAMPLE_COUNT)
 		local H = ImportanceSampleGGX(Xi, N, roughness)
 		local L = normalize(H * dot(V, H) * 2.0 - V)
 
@@ -90,5 +88,5 @@ function processPixel(x, y)
         end
 	end
 
-	return result / sampleCount
+	return result / SAMPLE_COUNT
 end

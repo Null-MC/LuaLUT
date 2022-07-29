@@ -1,11 +1,7 @@
 {
   "profiles": {
-    "LutBaker": {
+    "LuaLUT": {
       "commandName": "Project"
-    },
-    "Test": {
-      "commandName": "Project",
-      "commandLineArgs": "-s \"test-brdf.lua\" -o \"LUT.png\" -i \"PNG\" -f \"RGB\" -t \"BYTE\" -w 256 -h 256"
     }
   }
 }

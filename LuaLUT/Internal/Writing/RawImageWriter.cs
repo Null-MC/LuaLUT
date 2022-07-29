@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LutBaker.Internal.Writing
+namespace LuaLUT.Internal.Writing
 {
     internal class RawImageWriter : ImageWriterBase
     {
