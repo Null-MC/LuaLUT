@@ -1,4 +1,4 @@
-﻿sampleCount = 16  --1024
+﻿sampleCount = 1024
 
 function VanDerCorput(n, base)
     local invBase = 1.0 / base

@@ -2,6 +2,7 @@
 using LutBaker.Internal;
 using LutBaker.Internal.Writing;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -20,7 +21,6 @@ namespace LutBaker
                 if (parser.Errors.Any()) return 1;
 
                 await parser.WithParsedAsync(RunOptionsAsync);
-                Console.WriteLine("LUT generated successfully.");
                 return 0;
             }
             catch (Exception error) {
@@ -32,6 +32,7 @@ namespace LutBaker
         private static async Task RunOptionsAsync(MainOptions options)
         {
             if (options.Verbose) Console.WriteLine("Verbose output enabled.");
+            var timer = Stopwatch.StartNew();
 
             try {
                 var luaScript = await File.ReadAllTextAsync(options.ScriptFilename);
@@ -51,9 +52,13 @@ namespace LutBaker
                 }
 
                 await writer.ProcessAsync(luaScript, options.ImageWidth, options.ImageHeight);
+                timer.Stop();
+
+                Console.WriteLine($"LUT generated successfully! Duration: {timer.Elapsed:g}");
             }
             catch (Exception error) {
                 Console.WriteLine($"Failed to build LUT! {error.Message}\n{error}");
+                timer.Stop();
             }
         }
     }
