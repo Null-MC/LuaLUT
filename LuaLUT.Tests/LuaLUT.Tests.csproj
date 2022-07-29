@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LutBaker\LutBaker.csproj" />
+    <ProjectReference Include="..\LuaLUT\LuaLUT.csproj" />
   </ItemGroup>
 
 </Project>
