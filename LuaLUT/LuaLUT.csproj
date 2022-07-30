@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName></AssemblyName>
     <Authors>null511</Authors>
     <Company />
@@ -10,12 +10,14 @@
 
   <ItemGroup>
     <None Remove="LuaScripts\GLSL.lua" />
+    <None Remove="LuaScripts\GLSL_mat.lua" />
     <None Remove="LuaScripts\GLSL_ops.lua" />
     <None Remove="LuaScripts\GLSL_vec.lua" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="LuaScripts\GLSL_ops.lua" />
+    <EmbeddedResource Include="LuaScripts\GLSL_mat.lua" />
     <EmbeddedResource Include="LuaScripts\GLSL_vec.lua" />
     <EmbeddedResource Include="LuaScripts\GLSL.lua" />
   </ItemGroup>

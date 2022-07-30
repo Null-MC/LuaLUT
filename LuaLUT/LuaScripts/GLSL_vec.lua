@@ -1,5 +1,7 @@
 ﻿if vec ~= nil then return end
 
+--dofile("operatorFunctions.lua")
+
 -------------------------------- swizzles --------------------------------
 
 local swizzles = {
@@ -129,37 +131,9 @@ apiTable.binaryOp = function(a, b, func)
 	return setmetatable(result, vecMeta)
 end
 
-local function checkedBinaryOp(a, b, func, name)
-	local result = {}
-	if apiTable.isVec(a) then
-		if apiTable.isVec(b) then
-			if #a == #b then
-				for i = 1, #a do
-					result[i] = func(rawget(a, i), rawget(b, i))
-				end
-			else
-				error("Vectors have different numbers of dimensions: " .. #a .. " and " .. #b)
-			end
-		else
-			for i = 1, #a do
-				result[i] = func(rawget(a, i), b)
-			end
-		end
-	else
-		error("Vector must be on the left side of " .. name)
-	end
-	return setmetatable(result, vecMeta)
-end
-
-local function makeBinaryOp(func, name)
-	if name ~= nil then
-		return function(a, b)
-			return checkedBinaryOp(a, b, func, name)
-		end
-	else
-		return function(a, b)
-			return apiTable.binaryOp(a, b, func)
-		end
+local function makeBinaryOp(func)
+	return function(a, b)
+		return apiTable.binaryOp(a, b, func)
 	end
 end
 
@@ -256,21 +230,34 @@ vecMeta.__newindex = function(this, components, value)
 end
 
 --arithmetic
-vecMeta.__add  = makeBinaryOp(ops.add, "+")
-vecMeta.__sub  = makeBinaryOp(ops.sub, "-")
-vecMeta.__mul  = makeBinaryOp(ops.mul, "*")
-vecMeta.__div  = makeBinaryOp(ops.div, "/")
-vecMeta.__mod  = makeBinaryOp(ops.mod, "%")
-vecMeta.__pow  = makeBinaryOp(ops.pow, "^")
-vecMeta.__idiv = makeBinaryOp(ops.idiv, "//")
+vecMeta.__add  = makeBinaryOp(ops.add)
+vecMeta.__sub  = makeBinaryOp(ops.sub)
+vecMeta.__mul  = function(a, b)
+	if mat and mat.isMat(b) then
+		if #a ~= #rawget(b, 1) then
+			error("Matrix column vector count must equal vector dimensions.")
+		end
+		local result = {}
+		for i = 1, #a do
+			result[i] = apiTable.dot(a, b[i])
+		end
+		return setmetatable(result, vecMeta)
+	else
+		return apiTable.binaryOp(a, b, ops.mul)
+	end
+end
+vecMeta.__div  = makeBinaryOp(ops.div)
+vecMeta.__mod  = makeBinaryOp(ops.mod)
+vecMeta.__pow  = makeBinaryOp(ops.pow)
+vecMeta.__idiv = makeBinaryOp(ops.idiv)
 vecMeta.__unm  = makeUnaryOp (ops.unm)
 --bitwise
-vecMeta.__band = makeBinaryOp(ops.band, "&")
-vecMeta.__bor  = makeBinaryOp(ops.bor, "|")
-vecMeta.__bxor = makeBinaryOp(ops.bxor, "~")
-vecMeta.__shl  = makeBinaryOp(ops.shl, "<<")
-vecMeta.__shr  = makeBinaryOp(ops.shr, ">>")
-vecMeta.__bnot = makeUnaryOp (ops.bnot, "~")
+vecMeta.__band = makeBinaryOp(ops.band)
+vecMeta.__bor  = makeBinaryOp(ops.bor)
+vecMeta.__bxor = makeBinaryOp(ops.bxor)
+vecMeta.__shl  = makeBinaryOp(ops.shl)
+vecMeta.__shr  = makeBinaryOp(ops.shr)
+vecMeta.__bnot = makeUnaryOp (ops.bnot)
 --comparisons
 vecMeta.__eq = function(a, b)
 	if apiTable.isVec(a) and apiTable.isVec(b) then

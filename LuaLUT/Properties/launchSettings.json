@@ -2,7 +2,7 @@
   "profiles": {
     "LuaLUT": {
       "commandName": "Project",
-      "commandLineArgs": "-s \"D:\\MC-Shader\\Arc\\tools\\BRDF.lua\" -o \"D:\\MC-Shader\\LUT-Tester\\src\\shaders\\textures\\brdf.dat\" -i RAW -f RG -t FLOAT -w 256 -h 256 -v \"SAMPLE_COUNT=32\""
+      "commandLineArgs": "-s \"D:\\MC-Shader\\Arc\\tools\\BRDF.lua\" -o \"D:\\MC-Shader\\LUT-Tester\\src\\shaders\\textures\\brdf.dat\" -i RAW -f RG -t HALF_FLOAT -w 256 -h 256 -v \"SAMPLE_COUNT=32\""
     }
   }
 }
