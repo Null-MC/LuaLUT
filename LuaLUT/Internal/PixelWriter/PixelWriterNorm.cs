@@ -58,8 +58,8 @@ internal class PixelWriterNorm : PixelWriterBase<double>
         WriteUInt((uint)Math.Clamp(normValue * uint.MaxValue, uint.MinValue, uint.MaxValue));
 
     private void WriteHalf_Norm(in double normValue) =>
-        WriteHalf((Half)Math.Clamp(normValue * (double)Half.MaxValue, (double)Half.MinValue, (double)Half.MaxValue));
+        WriteHalf((Half)Math.Clamp(normValue, (double)Half.MinValue, (double)Half.MaxValue));
 
     private void WriteFloat_Norm(in double normValue) =>
-        WriteFloat((float)Math.Clamp(normValue * float.MaxValue, float.MinValue, float.MaxValue));
+        WriteFloat((float)Math.Clamp(normValue, float.MinValue, float.MaxValue));
 }

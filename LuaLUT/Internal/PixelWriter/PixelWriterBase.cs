@@ -75,36 +75,36 @@ internal abstract class PixelWriterBase<T>
     protected void WriteShort(in short value)
     {
         BinaryPrimitives.WriteInt16LittleEndian(buffer, value);
-        Stream.Write(buffer);
+        Stream.Write(buffer, 0, 2);
     }
 
     protected void WriteUShort(in ushort value)
     {
         BinaryPrimitives.WriteUInt16LittleEndian(buffer, value);
-        Stream.Write(buffer);
+        Stream.Write(buffer, 0, 2);
     }
 
     protected void WriteInt(in int value)
     {
         BinaryPrimitives.WriteInt32LittleEndian(buffer, value);
-        Stream.Write(buffer);
+        Stream.Write(buffer, 0, 4);
     }
 
     protected void WriteUInt(in uint value)
     {
         BinaryPrimitives.WriteUInt32LittleEndian(buffer, value);
-        Stream.Write(buffer);
+        Stream.Write(buffer, 0, 4);
     }
 
     protected void WriteHalf(in Half value)
     {
         BinaryPrimitives.WriteHalfLittleEndian(buffer, Half.IsNaN(value) ? (Half)0 : value);
-        Stream.Write(buffer);
+        Stream.Write(buffer, 0, 2);
     }
 
     protected void WriteFloat(in float value)
     {
         BinaryPrimitives.WriteSingleLittleEndian(buffer, float.IsNaN(value) ? 0f : value);
-        Stream.Write(buffer);
+        Stream.Write(buffer, 0, 4);
     }
 }
