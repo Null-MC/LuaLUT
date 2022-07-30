@@ -69,7 +69,10 @@ internal class Program
     private static IImageWriter GetImageWriter(Stream outputStream, ImageType imageType, PixelFormat pixelFormat, PixelType pixelType)
     {
         if (imageType != ImageType.Raw)
-            return new StandardImageWriter(outputStream, imageType);
+            return new StandardImageWriter(outputStream, imageType) {
+                PixelFormat = pixelFormat,
+                PixelType = pixelType,
+            };
 
         if (PixelFormats.IsNormalized(pixelFormat)) {
             var pixelWriterNorm = new PixelWriterNorm(outputStream) {
