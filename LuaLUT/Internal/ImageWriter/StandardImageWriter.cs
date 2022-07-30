@@ -72,7 +72,7 @@ internal class StandardImageWriter : ImageWriterBase
     private Image CreateImage(in int width, in int height)
     {
         switch (PixelType) {
-            case PixelType.BYTE:
+            case PixelType.UNSIGNED_BYTE:
                 switch (PixelFormat) {
                     case PixelFormat.R_NORM:
                         return new Image<L8>(Configuration.Default, width, height);

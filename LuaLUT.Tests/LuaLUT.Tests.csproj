@@ -7,23 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="TestScripts\brdf-bit.lua" />
-    <None Remove="TestScripts\BRDF.lua" />
-    <None Remove="TestScripts\custom-variables.lua" />
-    <None Remove="TestScripts\simple.lua" />
-    <None Remove="TestScripts\test1.lua" />
+    <None Remove="TestScripts\variable.lua" />
+    <None Remove="TestScripts\xy_gradient.lua" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="TestScripts\brdf-bit.lua">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TestScripts\BRDF.lua" />
-    <EmbeddedResource Include="TestScripts\simple.lua">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TestScripts\custom-variables.lua" />
-    <EmbeddedResource Include="TestScripts\test1.lua" />
+    <EmbeddedResource Include="TestScripts\variable.lua" />
+    <EmbeddedResource Include="TestScripts\xy_gradient.lua" />
   </ItemGroup>
 
   <ItemGroup>
