@@ -3,8 +3,9 @@ using System.Collections.Generic;
 
 namespace LuaLUT.Internal.PixelWriter;
 
-internal enum PixelType
+public enum PixelType
 {
+    UNDEFINED,
     BYTE,
     SHORT,
     INT,

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LuaLUT.Internal.PixelWriter;
 
-internal enum PixelFormat
+public enum PixelFormat
 {
+    UNDEFINED,
     R_NORM,
     RG_NORM,
     RGB_NORM,
@@ -53,9 +55,47 @@ internal static class PixelFormats
     };
 
 
-    public static PixelFormat Parse(string name)
+    public static PixelFormat Parse(in string name)
     {
         if (parseMap.TryGetValue(name, out var pixelFormat)) return pixelFormat;
         throw new ApplicationException($"Unknown pixel format '{name}'!");
     }
+
+    public static int GetStride(in PixelFormat pixelFormat)
+    {
+        switch (pixelFormat) {
+            case PixelFormat.R_NORM:
+            case PixelFormat.R_INT:
+                return 1;
+            case PixelFormat.RG_NORM:
+            case PixelFormat.RG_INT:
+                return 2;
+            case PixelFormat.RGB_NORM:
+            case PixelFormat.RGB_INT:
+            case PixelFormat.BGR_NORM:
+            case PixelFormat.BGR_INT:
+                return 3;
+            case PixelFormat.RGBA_NORM:
+            case PixelFormat.RGBA_INT:
+            case PixelFormat.BGRA_NORM:
+            case PixelFormat.BGRA_INT:
+                return 4;
+            default:
+                throw new ApplicationException("Unsupported");
+        }
+    }
+
+    public static bool IsNormalized(in PixelFormat pixelFormat)
+    {
+        return normalizedFormats.Contains(pixelFormat);
+    }
+
+    private static readonly PixelFormat[] normalizedFormats = {
+        PixelFormat.R_NORM,
+        PixelFormat.RG_NORM,
+        PixelFormat.RGB_NORM,
+        PixelFormat.RGBA_NORM,
+        PixelFormat.BGR_NORM,
+        PixelFormat.BGRA_NORM,
+    };
 }

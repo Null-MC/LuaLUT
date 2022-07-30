@@ -5,74 +5,34 @@ namespace LuaLUT.Internal.PixelWriter;
 
 internal class PixelWriterNorm : PixelWriterBase<double>
 {
-    private delegate void WritePixelNormAction(in double value);
-
-
-    public PixelWriterNorm(Stream stream) : base(stream) { }
+    public PixelWriterNorm(Stream stream) : base(stream) {}
 
     public override void Write(in double[] pixel)
     {
         switch (PixelType) {
             case PixelType.BYTE:
-                WritePixel_Norm(WriteByte_Norm, in pixel);
+                WritePixelChannels(WriteByte_Norm, in pixel);
                 break;
             case PixelType.SHORT:
-                WritePixel_Norm(WriteShort_Norm, pixel);
+                WritePixelChannels(WriteShort_Norm, pixel);
                 break;
             case PixelType.INT:
-                WritePixel_Norm(WriteInt_Norm, pixel);
+                WritePixelChannels(WriteInt_Norm, pixel);
                 break;
             case PixelType.UNSIGNED_BYTE:
-                WritePixel_Norm(WriteUByte_Norm, pixel);
+                WritePixelChannels(WriteUByte_Norm, pixel);
                 break;
             case PixelType.UNSIGNED_SHORT:
-                WritePixel_Norm(WriteUShort_Norm, pixel);
+                WritePixelChannels(WriteUShort_Norm, pixel);
                 break;
             case PixelType.UNSIGNED_INT:
-                WritePixel_Norm(WriteUInt_Norm, pixel);
+                WritePixelChannels(WriteUInt_Norm, pixel);
                 break;
             case PixelType.HALF_FLOAT:
-                WritePixel_Norm(WriteHalf_Norm, pixel);
+                WritePixelChannels(WriteHalf_Norm, pixel);
                 break;
             case PixelType.FLOAT:
-                WritePixel_Norm(WriteFloat_Norm, pixel);
-                break;
-            default:
-                throw new ApplicationException("Unsupported");
-        }
-    }
-
-    private void WritePixel_Norm(WritePixelNormAction writeAction, in double[] pixel)
-    {
-        switch (PixelFormat) {
-            case PixelFormat.R_NORM:
-                writeAction(pixel[0]);
-                break;
-            case PixelFormat.RG_NORM:
-                writeAction(pixel[0]);
-                writeAction(pixel[1]);
-                break;
-            case PixelFormat.RGB_NORM:
-                writeAction(pixel[0]);
-                writeAction(pixel[1]);
-                writeAction(pixel[2]);
-                break;
-            case PixelFormat.RGBA_NORM:
-                writeAction(pixel[0]);
-                writeAction(pixel[1]);
-                writeAction(pixel[2]);
-                writeAction(pixel[3]);
-                break;
-            case PixelFormat.BGR_NORM:
-                writeAction(pixel[2]);
-                writeAction(pixel[1]);
-                writeAction(pixel[0]);
-                break;
-            case PixelFormat.BGRA_NORM:
-                writeAction(pixel[2]);
-                writeAction(pixel[1]);
-                writeAction(pixel[0]);
-                writeAction(pixel[3]);
+                WritePixelChannels(WriteFloat_Norm, pixel);
                 break;
             default:
                 throw new ApplicationException("Unsupported");

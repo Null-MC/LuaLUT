@@ -1,9 +1,9 @@
-﻿using System;
+﻿using LuaLUT.Internal.PixelWriter;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using LuaLUT.Internal.PixelWriter;
 
 namespace LuaLUT.Internal.ImageWriter;
 
@@ -21,10 +21,14 @@ internal class RawImageWriter<T> : ImageWriterBase
 
     public override async Task ProcessAsync(string luaScript, int width, int height, CancellationToken token = default)
     {
-        var stride = GetPixelStride();
+        var stride = PixelFormats.GetStride(PixelFormat);
 
         var processPixelRowBlock = new TransformBlock<int, T[]>(y => {
             var rowSpan = new T[width*stride];
+
+            void SetRowPixel(int i, object value) {
+                rowSpan[i] = value is T valueT ? valueT : (T)Convert.ChangeType(value, typeof(T));
+            }
 
             using var processor = new LuaScriptProcessor {
                 CustomVariables = CustomVariables,
@@ -40,10 +44,10 @@ internal class RawImageWriter<T> : ImageWriterBase
                 if (pixel.Length != stride) throw new ApplicationException($"Returned pixel length {pixel.Length} does not match expected stride length of {stride}!");
 
                 var i = x * stride;
-                if (stride >= 1) rowSpan[i  ] = (T)pixel[0];
-                if (stride >= 2) rowSpan[i+1] = (T)pixel[1];
-                if (stride >= 3) rowSpan[x+2] = (T)pixel[2];
-                if (stride >= 4) rowSpan[x+3] = (T)pixel[3];
+                if (stride >= 1) SetRowPixel(i  , pixel[0]);
+                if (stride >= 2) SetRowPixel(i+1, pixel[1]);
+                if (stride >= 3) SetRowPixel(i+2, pixel[2]);
+                if (stride >= 4) SetRowPixel(i+3, pixel[3]);
             }
 
             return rowSpan;
@@ -65,29 +69,5 @@ internal class RawImageWriter<T> : ImageWriterBase
 
         processPixelRowBlock.Complete();
         await writeRowBlock.Completion;
-    }
-
-    private int GetPixelStride()
-    {
-        switch (PixelFormat) {
-            case PixelFormat.R_NORM:
-            case PixelFormat.R_INT:
-                return 1;
-            case PixelFormat.RG_NORM:
-            case PixelFormat.RG_INT:
-                return 2;
-            case PixelFormat.RGB_NORM:
-            case PixelFormat.RGB_INT:
-            case PixelFormat.BGR_NORM:
-            case PixelFormat.BGR_INT:
-                return 3;
-            case PixelFormat.RGBA_NORM:
-            case PixelFormat.RGBA_INT:
-            case PixelFormat.BGRA_NORM:
-            case PixelFormat.BGRA_INT:
-                return 4;
-            default:
-                throw new ApplicationException("Unsupported");
-        }
     }
 }

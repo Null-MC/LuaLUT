@@ -6,6 +6,8 @@ namespace LuaLUT.Internal.PixelWriter;
 
 internal abstract class PixelWriterBase<T>
 {
+    protected delegate void WritePixelAction(in T value);
+
     private readonly byte[] buffer;
     public readonly Stream Stream;
 
@@ -20,6 +22,49 @@ internal abstract class PixelWriterBase<T>
     }
 
     public abstract void Write(in T[] pixel);
+
+    protected void WritePixelChannels(WritePixelAction writeAction, in T[] pixel)
+    {
+        switch (PixelFormat) {
+            case PixelFormat.R_NORM:
+            case PixelFormat.R_INT:
+                writeAction(pixel[0]);
+                break;
+            case PixelFormat.RG_NORM:
+            case PixelFormat.RG_INT:
+                writeAction(pixel[0]);
+                writeAction(pixel[1]);
+                break;
+            case PixelFormat.RGB_NORM:
+            case PixelFormat.RGB_INT:
+                writeAction(pixel[0]);
+                writeAction(pixel[1]);
+                writeAction(pixel[2]);
+                break;
+            case PixelFormat.RGBA_NORM:
+            case PixelFormat.RGBA_INT:
+                writeAction(pixel[0]);
+                writeAction(pixel[1]);
+                writeAction(pixel[2]);
+                writeAction(pixel[3]);
+                break;
+            case PixelFormat.BGR_NORM:
+            case PixelFormat.BGR_INT:
+                writeAction(pixel[2]);
+                writeAction(pixel[1]);
+                writeAction(pixel[0]);
+                break;
+            case PixelFormat.BGRA_NORM:
+            case PixelFormat.BGRA_INT:
+                writeAction(pixel[2]);
+                writeAction(pixel[1]);
+                writeAction(pixel[0]);
+                writeAction(pixel[3]);
+                break;
+            default:
+                throw new ApplicationException("Unsupported");
+        }
+    }
 
     protected void WriteByte(in sbyte value) =>
         throw new NotImplementedException();

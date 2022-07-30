@@ -71,37 +71,26 @@ internal class Program
         if (imageType != ImageType.Raw)
             return new StandardImageWriter(outputStream, imageType);
 
-        switch (pixelFormat) {
-            case PixelFormat.R_NORM:
-            case PixelFormat.RG_NORM:
-            case PixelFormat.RGB_NORM:
-            case PixelFormat.RGBA_NORM:
-            case PixelFormat.BGR_NORM:
-            case PixelFormat.BGRA_NORM:
-                var pixelWriterNorm = new PixelWriterNorm(outputStream) {
-                    PixelFormat = pixelFormat,
-                    PixelType = pixelType,
-                };
-                return new RawImageWriter<double>(pixelWriterNorm) {
-                    PixelFormat = pixelFormat,
-                    PixelType = pixelType,
-                };
-            case PixelFormat.R_INT:
-            case PixelFormat.RG_INT:
-            case PixelFormat.RGB_INT:
-            case PixelFormat.RGBA_INT:
-            case PixelFormat.BGR_INT:
-            case PixelFormat.BGRA_INT:
-                var pixelWriterInt = new PixelWriterInt(outputStream) {
-                    PixelFormat = pixelFormat,
-                    PixelType = pixelType,
-                };
-                return new RawImageWriter<long>(pixelWriterInt) {
-                    PixelFormat = pixelFormat,
-                    PixelType = pixelType,
-                };
-            default:
-                throw new ApplicationException("Unsupported");
+        if (PixelFormats.IsNormalized(pixelFormat)) {
+            var pixelWriterNorm = new PixelWriterNorm(outputStream) {
+                PixelFormat = pixelFormat,
+                PixelType = pixelType,
+            };
+
+            return new RawImageWriter<double>(pixelWriterNorm) {
+                PixelFormat = pixelFormat,
+                PixelType = pixelType,
+            };
         }
+
+        var pixelWriterInt = new PixelWriterInt(outputStream) {
+            PixelFormat = pixelFormat,
+            PixelType = pixelType,
+        };
+
+        return new RawImageWriter<long>(pixelWriterInt) {
+            PixelFormat = pixelFormat,
+            PixelType = pixelType,
+        };
     }
 }
