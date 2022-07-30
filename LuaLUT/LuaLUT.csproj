@@ -3,23 +3,18 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName></AssemblyName>
     <Authors>null511</Authors>
-    <Company />
+    <AssemblyVersion>0.2</AssemblyVersion>
+    <FileVersion>0.2</FileVersion>
+    <Version>0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="LuaScripts\GLSL.lua" />
-    <None Remove="LuaScripts\GLSL_mat.lua" />
-    <None Remove="LuaScripts\GLSL_ops.lua" />
-    <None Remove="LuaScripts\GLSL_vec.lua" />
+    <None Remove="LuaScripts\*.lua" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="LuaScripts\GLSL_ops.lua" />
-    <EmbeddedResource Include="LuaScripts\GLSL_mat.lua" />
-    <EmbeddedResource Include="LuaScripts\GLSL_vec.lua" />
-    <EmbeddedResource Include="LuaScripts\GLSL.lua" />
+    <EmbeddedResource Include="LuaScripts\*.lua" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,12 +22,6 @@
     <PackageReference Include="NLua" Version="1.6.0" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="test-brdf.lua">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
