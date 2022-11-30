@@ -2,7 +2,7 @@
   "profiles": {
     "LuaLUT": {
       "commandName": "Project",
-      "commandLineArgs": "-s \"D:\\MC-Shader\\Arc\\tools\\BRDF.lua\" -o \"D:\\MC-Shader\\LUT-Tester\\src\\shaders\\textures\\brdf.dat\" -i RAW -f RG -t HALF_FLOAT -w 128 -h 128 -v \"SAMPLE_COUNT=32\""
+      "commandLineArgs": "--script \"D:\\\\MC-Shader\\\\Arc\\\\tools\\\\lua\\\\multiple_scattering.lua\"\r\n--out \"D:\\\\MC-Shader\\\\Arc\\\\src\\\\shaders\\\\textures\\\\\"\r\n--img \"PNG\"\r\n--format \"RGB\"\r\n--type \"HALF_FLOAT\"\r\n-w 32\r\n-h 32\r\n-i \"atmosphere.lua\""
     }
   }
 }

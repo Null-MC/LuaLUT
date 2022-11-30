@@ -19,28 +19,37 @@ internal class RawImageWriter<T> : ImageWriterBase
         this.pixelWriter = pixelWriter;
     }
 
-    public override async Task ProcessAsync(string luaScript, int width, int height, CancellationToken token = default)
+    public override async Task ProcessAsync(string luaScript, CancellationToken token = default)
     {
         var stride = PixelFormats.GetStride(PixelFormat);
 
-        var processPixelRowBlock = new TransformBlock<int, T[]>(y => {
-            var rowSpan = new T[width*stride];
+        var processPixelRowBlock = new TransformBlock<(int z, int y), T[]>(args => {
+            var rowSpan = new T[ImageWidth*stride];
 
             void SetRowPixel(int i, object value) {
                 rowSpan[i] = value is T valueT ? valueT : (T)Convert.ChangeType(value, typeof(T));
             }
 
             using var processor = new LuaScriptProcessor {
+                IncludedFiles = IncludedFiles,
                 CustomVariables = CustomVariables,
+                Dimensions = ImageDimensions,
+                Width = ImageWidth,
+                Height = ImageHeight,
+                Depth = ImageDepth,
                 Script = luaScript,
-                Width = width,
-                Height = height,
             };
 
             processor.Initialize();
 
-            for (var x = 0; x < width; x++) {
-                var pixel = processor.ProcessPixel(x, y);
+            for (var x = 0; x < ImageWidth; x++) {
+                var pixel = ImageDimensions switch {
+                    1 => processor.ProcessPixel(x),
+                    2 => processor.ProcessPixel(x, args.y),
+                    3 => processor.ProcessPixel(x, args.y, args.z),
+                    _ => throw new ApplicationException($"Unsupported dimension count '{ImageDimensions}'!"),
+                };
+
                 if (pixel.Length != stride) throw new ApplicationException($"Returned pixel length {pixel.Length} does not match expected stride length of {stride}!");
 
                 var i = x * stride;
@@ -64,8 +73,12 @@ internal class RawImageWriter<T> : ImageWriterBase
             PropagateCompletion = true,
         });
 
-        for (var y = 0; y < height; y++)
-            processPixelRowBlock.Post(y);
+        var yMax = ImageDimensions >= 2 ? ImageHeight : 1;
+        var zMax = ImageDimensions >= 3 ? ImageDepth : 1;
+
+        for (var z = 0; z < zMax; z++)
+            for (var y = 0; y < yMax; y++)
+                processPixelRowBlock.Post((z, y));
 
         processPixelRowBlock.Complete();
         await writeRowBlock.Completion;

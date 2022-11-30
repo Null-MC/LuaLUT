@@ -7,7 +7,7 @@ using Xunit;
 
 namespace LuaLUT.Tests;
 
-public class RawWriterTests : TestBase
+public class RawWriterTests_2D : TestBase
 {
     [InlineData(0.0f,   0)]
     [InlineData(0.5f, 127)]
@@ -15,6 +15,7 @@ public class RawWriterTests : TestBase
     [Theory] public async Task CanWriteNormalized_UBYTE(float actualValue, byte expectedValue)
     {
         var outputBuffer = await WriteDataAsync(PixelFormat.R_NORM, PixelType.UNSIGNED_BYTE, actualValue);
+        Assert.Equal(4, outputBuffer.Length);
         ByteAssert.UByteEquals(outputBuffer, 0, expectedValue);
     }
 
@@ -24,6 +25,7 @@ public class RawWriterTests : TestBase
     [Theory] public async Task CanWriteInteger_UBYTE(long actualValue, byte expectedValue)
     {
         var outputBuffer = await WriteDataAsync(PixelFormat.R_INT, PixelType.UNSIGNED_BYTE, actualValue);
+        Assert.Equal(4, outputBuffer.Length);
         ByteAssert.UByteEquals(outputBuffer, 0, expectedValue);
     }
 
@@ -33,6 +35,7 @@ public class RawWriterTests : TestBase
     [Theory] public async Task CanWriteNormalized_USHORT(float actualValue, ushort expectedValue)
     {
         var outputBuffer = await WriteDataAsync(PixelFormat.R_NORM, PixelType.UNSIGNED_SHORT, actualValue);
+        Assert.Equal(8, outputBuffer.Length);
         ByteAssert.UShortEquals(outputBuffer, 0, expectedValue);
     }
 
@@ -42,6 +45,7 @@ public class RawWriterTests : TestBase
     [Theory] public async Task CanWriteInteger_USHORT(long actualValue, ushort expectedValue)
     {
         var outputBuffer = await WriteDataAsync(PixelFormat.R_INT, PixelType.UNSIGNED_SHORT, actualValue);
+        Assert.Equal(8, outputBuffer.Length);
         ByteAssert.UShortEquals(outputBuffer, 0, expectedValue);
     }
 
@@ -51,6 +55,7 @@ public class RawWriterTests : TestBase
     [Theory] public async Task CanWriteNormalized_UINT(float actualValue, uint expectedValue)
     {
         var outputBuffer = await WriteDataAsync(PixelFormat.R_NORM, PixelType.UNSIGNED_INT, actualValue);
+        Assert.Equal(16, outputBuffer.Length);
         ByteAssert.UIntEquals(outputBuffer, 0, expectedValue);
     }
 
@@ -60,20 +65,26 @@ public class RawWriterTests : TestBase
     [Theory] public async Task CanWriteInteger_UINT(long actualValue, uint expectedValue)
     {
         var outputBuffer = await WriteDataAsync(PixelFormat.R_INT, PixelType.UNSIGNED_INT, actualValue);
+        Assert.Equal(16, outputBuffer.Length);
         ByteAssert.UIntEquals(outputBuffer, 0, expectedValue);
     }
 
     protected static async Task<byte[]> WriteDataAsync(PixelFormat pixelFormat, PixelType pixelType, float actualValue)
     {
         using var outputStream = new MemoryStream();
+        var luaScript = await LoadScriptAsync("variable.lua");
 
+        IImageWriter imageWriter;
         if (PixelFormats.IsNormalized(pixelFormat)) {
             var pixelWriter = new PixelWriterNorm(outputStream) {
                 PixelFormat = pixelFormat,
                 PixelType = pixelType,
             };
 
-            await WriteRawDataAsync(pixelWriter, pixelFormat, pixelType, actualValue);
+            imageWriter = new RawImageWriter<double>(pixelWriter) {
+                PixelFormat = pixelFormat,
+                PixelType = pixelType,
+            };
         }
         else {
             var pixelWriter = new PixelWriterInt(outputStream) {
@@ -81,23 +92,19 @@ public class RawWriterTests : TestBase
                 PixelType = pixelType,
             };
 
-            await WriteRawDataAsync(pixelWriter, pixelFormat, pixelType, actualValue);
+            imageWriter = new RawImageWriter<long>(pixelWriter) {
+                PixelFormat = pixelFormat,
+                PixelType = pixelType,
+            };
         }
 
-        return outputStream.GetBuffer();
-    }
+        imageWriter.ImageWidth = 2;
+        imageWriter.ImageHeight = 2;
+        imageWriter.ImageDimensions = 2;
+        imageWriter.CustomVariables["value"] = actualValue;
 
-    private static async Task WriteRawDataAsync<T>(PixelWriterBase<T> pixelWriter, PixelFormat pixelFormat, PixelType pixelType, float actualValue)
-    {
-        var imageWriter = new RawImageWriter<T>(pixelWriter) {
-            PixelFormat = pixelFormat,
-            PixelType = pixelType,
-            CustomVariables = {
-                ["value"] = actualValue,
-            },
-        };
+        await imageWriter.ProcessAsync(luaScript);
 
-        var luaScript = await LoadScriptAsync("variable.lua");
-        await imageWriter.ProcessAsync(luaScript, 1, 1);
+        return outputStream.GetBuffer()[..(int)outputStream.Length];
     }
 }

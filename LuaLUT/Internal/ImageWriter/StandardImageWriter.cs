@@ -19,24 +19,29 @@ internal class StandardImageWriter : ImageWriterBase
         this.imageType = imageType;
     }
 
-    public override async Task ProcessAsync(string luaScript, int width, int height, CancellationToken token = default)
+    public override async Task ProcessAsync(string luaScript, CancellationToken token = default)
     {
-        using var image = CreateImage(width, height);
+        // TODO: add special layout for 3D?
+
+        using var image = CreateImage(ImageWidth, ImageHeight);
 
         image.Mutate(context => {
             // TODO: if integer format, don't use vec4
 
             context.ProcessPixelRowsAsVector4((row, point) => {
                 using var processor = new LuaScriptProcessor {
+                    IncludedFiles = IncludedFiles,
                     CustomVariables = CustomVariables,
+                    Dimensions = ImageDimensions,
+                    Width = ImageWidth,
+                    Height = ImageHeight,
+                    Depth = ImageDepth,
                     Script = luaScript,
-                    Width = width,
-                    Height = height,
                 };
 
                 processor.Initialize();
 
-                for (var x = 0; x < width; x++) {
+                for (var x = 0; x < ImageWidth; x++) {
                     var pixel = processor.ProcessPixel(point.X + x, point.Y);
 
                     if (PixelFormat is PixelFormat.R_NORM or PixelFormat.R_INT) {
@@ -65,41 +70,28 @@ internal class StandardImageWriter : ImageWriterBase
                 await image.SaveAsBmpAsync(Stream, token);
                 break;
             default:
-                throw new ApplicationException();
+                throw new ApplicationException("Only BMP and PNG formats are currently supported for non-raw images!");
         }
     }
 
     private Image CreateImage(in int width, in int height)
     {
-        switch (PixelType) {
-            case PixelType.UNSIGNED_BYTE:
-                switch (PixelFormat) {
-                    case PixelFormat.R_NORM:
-                        return new Image<L8>(Configuration.Default, width, height);
-                    case PixelFormat.RG_NORM:
-                        return new Image<Rgb24>(Configuration.Default, width, height);
-                    case PixelFormat.RGB_NORM:
-                        return new Image<Rgb24>(Configuration.Default, width, height);
-                    case PixelFormat.RGBA_NORM:
-                        return new Image<Rgba32>(Configuration.Default, width, height);
-                    default:
-                        throw new ApplicationException("Unsupported");
-                }
-            case PixelType.HALF_FLOAT:
-                switch (PixelFormat) {
-                    case PixelFormat.R_NORM:
-                        return new Image<L16>(Configuration.Default, width, height);
-                    case PixelFormat.RG_NORM:
-                        return new Image<Rgb48>(Configuration.Default, width, height);
-                    case PixelFormat.RGB_NORM:
-                        return new Image<Rgb48>(Configuration.Default, width, height);
-                    case PixelFormat.RGBA_NORM:
-                        return new Image<Rgba64>(Configuration.Default, width, height);
-                    default:
-                        throw new ApplicationException("Unsupported");
-                }
-            default:
-                throw new ApplicationException("Unsupported");
-        }
+        return PixelType switch {
+            PixelType.UNSIGNED_BYTE => PixelFormat switch {
+                PixelFormat.R_NORM => new Image<L8>(Configuration.Default, width, height),
+                PixelFormat.RG_NORM => new Image<Rgb24>(Configuration.Default, width, height),
+                PixelFormat.RGB_NORM => new Image<Rgb24>(Configuration.Default, width, height),
+                PixelFormat.RGBA_NORM => new Image<Rgba32>(Configuration.Default, width, height),
+                _ => throw new ApplicationException("Unsupported")
+            },
+            PixelType.HALF_FLOAT => PixelFormat switch {
+                PixelFormat.R_NORM => new Image<L16>(Configuration.Default, width, height),
+                PixelFormat.RG_NORM => new Image<Rgb48>(Configuration.Default, width, height),
+                PixelFormat.RGB_NORM => new Image<Rgb48>(Configuration.Default, width, height),
+                PixelFormat.RGBA_NORM => new Image<Rgba64>(Configuration.Default, width, height),
+                _ => throw new ApplicationException("Unsupported")
+            },
+            _ => throw new ApplicationException("Unsupported")
+        };
     }
 }

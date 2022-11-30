@@ -2,19 +2,19 @@
 A small tool for baking LUT images for Minecraft shaders using Lua scripting.
 
 ## Usage
-Using the lua script below saved to a file "lut.lua"
+### Generate 2D PNG
+Using the lua script below saved to a file "lut.lua", this will generate a 2D RGB PNG texture using the normalized texel coordinates (0-1).
 
 ```lua
-function processPixel(x, y)
-    f = vec(x, y) / vec(width, height)
-    return vec(f.x, f.y, f.x * f.y)
+function processTexel(x, y)
+    return 2.0 * vec(x, y, 1.0) - 1.0
 end
 ```
 
-You can run LUT-Baker using the following command to generate a LUT.png image.
+Then run LuaLUT using the following command to generate a LUT.png image.
 
 ```
-lualut -s "lut.lua" -o "lut.png" -i "PNG" -f "RGB" -t "BYTE" -w 128 -h 128
+lualut -s "lut.lua" -i "PNG" -f "RGB" -t "BYTE" -w 128 -h 128
 ```
 
 ## Custom Variables

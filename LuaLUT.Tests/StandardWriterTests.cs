@@ -35,6 +35,9 @@ public class StandardWriterTests : TestBase
         using var outputStream = new MemoryStream();
 
         var writer = new StandardImageWriter(outputStream, ImageType.Png) {
+            ImageWidth = 1,
+            ImageHeight = 1,
+            ImageDimensions = 2,
             PixelFormat = pixelFormat,
             PixelType = pixelType,
             CustomVariables = {
@@ -43,7 +46,7 @@ public class StandardWriterTests : TestBase
         };
 
         var luaScript = await LoadScriptAsync("variable.lua");
-        await writer.ProcessAsync(luaScript, 1, 1);
+        await writer.ProcessAsync(luaScript);
 
         outputStream.Seek(0, SeekOrigin.Begin);
         return await Image.LoadAsync<T>(outputStream);

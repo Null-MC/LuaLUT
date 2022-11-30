@@ -33,14 +33,27 @@ internal class Program
         var timer = Stopwatch.StartNew();
 
         try {
-            var luaScript = await File.ReadAllTextAsync(options.ScriptFilename);
-            await using var outputStream = File.Open(options.ImageFilename, FileMode.Create, FileAccess.Write);
-                
             var imageType = ImageTypes.Parse(options.ImageType);
             var pixelFormat = PixelFormats.Parse(options.PixelFormat);
             var pixelType = PixelTypes.Parse(options.PixelType);
 
+            var outputFile = options.Output.FullName;
+            if (outputFile.EndsWith('\\') || outputFile.EndsWith('/')) {
+                var ext = GetDefaultExtension(imageType);
+                outputFile += Path.GetFileNameWithoutExtension(options.Script.Name)+ext;
+            }
+
+            var luaScript = await File.ReadAllTextAsync(options.Script.FullName);
+            await using var outputStream = File.Open(outputFile, FileMode.Create, FileAccess.Write);
+                
             var writer = GetImageWriter(outputStream, imageType, pixelFormat, pixelType);
+            writer.ImageWidth = options.ImageWidth;
+            writer.ImageHeight = options.ImageHeight ?? 1;
+            writer.ImageDepth = options.ImageDepth ?? 1;
+
+            writer.ImageDimensions = 1;
+            if (options.ImageHeight.HasValue)
+                writer.ImageDimensions = options.ImageDepth.HasValue ? 3 : 2;
 
             if (options.CustomVariables.Any()) {
                 foreach (var part in options.CustomVariables) {
@@ -55,7 +68,23 @@ internal class Program
                 }
             }
 
-            await writer.ProcessAsync(luaScript, options.ImageWidth, options.ImageHeight);
+            if (options.IncludeFiles.Any()) {
+                foreach (var file in options.IncludeFiles) {
+                    var fileName = Path.GetFullPath(file);
+
+                    if (!File.Exists(fileName)) {
+                        var scriptPath = options.Script.DirectoryName;
+                        fileName = Path.Join(scriptPath, file);
+                    }
+
+                    if (!File.Exists(fileName))
+                        throw new ApplicationException($"Failed to locate included script '{file}' in either current nor script directories!");
+
+                    writer.IncludedFiles.Add(fileName);
+                }
+            }
+
+            await writer.ProcessAsync(luaScript);
             timer.Stop();
 
             Console.WriteLine($"LUT generated successfully! Duration: {timer.Elapsed:g}");
@@ -94,6 +123,16 @@ internal class Program
         return new RawImageWriter<long>(pixelWriterInt) {
             PixelFormat = pixelFormat,
             PixelType = pixelType,
+        };
+    }
+
+    private static string GetDefaultExtension(ImageType imageType)
+    {
+        return imageType switch {
+            ImageType.Bmp => ".bmp",
+            ImageType.Png => ".png",
+            ImageType.Raw => ".dat",
+            _ => throw new ApplicationException($"Unsupported image type '{imageType}'!")
         };
     }
 }
