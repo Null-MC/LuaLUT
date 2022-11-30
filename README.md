@@ -1,8 +1,7 @@
 # LuaLUT
-A small tool for baking LUT images for Minecraft shaders using Lua scripting.
+A small tool for baking LUT images for Minecraft shaders using Lua scripting. Supports 1D, 2D, and 3D textures; in BMP, PNG, and RAW formats.
 
 ## Usage
-### Generate 2D PNG
 Using the lua script below saved to a file "lut.lua", this will generate a 2D RGB PNG texture using the normalized texel coordinates (0-1).
 
 ```lua
@@ -29,3 +28,6 @@ end
 ```
 lualut <...> -var "red=1.0;green=0.5;blue=0.0"
 ```
+
+### Special Thanks
+- BuilderbOy, for providing very comprehensive Lua vector and matrix libraries.
