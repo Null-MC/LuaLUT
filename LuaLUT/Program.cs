@@ -42,6 +42,12 @@ internal class Program
             }
 
             var luaScript = await File.ReadAllTextAsync(options.Script.FullName);
+
+            // Create directory for output file if it doesn't exist
+            var outputPath = Path.GetDirectoryName(outputFile);
+            if (outputPath != null && !Directory.Exists(outputPath))
+                Directory.CreateDirectory(outputPath);
+
             await using var outputStream = File.Open(outputFile, FileMode.Create, FileAccess.Write);
                 
             var writer = GetImageWriter(outputStream, options);
