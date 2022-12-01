@@ -34,8 +34,6 @@ internal class Program
 
         try {
             var imageType = ImageTypes.Parse(options.ImageType);
-            var pixelFormat = PixelFormats.Parse(options.PixelFormat);
-            var pixelType = PixelTypes.Parse(options.PixelType);
 
             var outputFile = options.Output.FullName;
             if (outputFile.EndsWith('\\') || outputFile.EndsWith('/')) {
@@ -46,7 +44,7 @@ internal class Program
             var luaScript = await File.ReadAllTextAsync(options.Script.FullName);
             await using var outputStream = File.Open(outputFile, FileMode.Create, FileAccess.Write);
                 
-            var writer = GetImageWriter(outputStream, imageType, pixelFormat, pixelType);
+            var writer = GetImageWriter(outputStream, options);
             writer.ImageWidth = options.ImageWidth;
             writer.ImageHeight = options.ImageHeight ?? 1;
             writer.ImageDepth = options.ImageDepth ?? 1;
@@ -95,10 +93,15 @@ internal class Program
         }
     }
 
-    private static IImageWriter GetImageWriter(Stream outputStream, ImageType imageType, PixelFormat pixelFormat, PixelType pixelType)
+    private static IImageWriter GetImageWriter(Stream outputStream, MainOptions options)
     {
+        var imageType = ImageTypes.Parse(options.ImageType);
+        var pixelFormat = PixelFormats.Parse(options.PixelFormat);
+        var pixelType = PixelTypes.Parse(options.PixelType);
+
         if (imageType != ImageType.Raw)
             return new StandardImageWriter(outputStream, imageType) {
+                DepthSlice = options.DepthSlice ?? 0,
                 PixelFormat = pixelFormat,
                 PixelType = pixelType,
             };

@@ -62,11 +62,14 @@ internal class RawImageWriter<T> : ImageWriterBase
             return rowSpan;
         }, new ExecutionDataflowBlockOptions {
             MaxDegreeOfParallelism = MaxDegreeOfParallelism,
+            EnsureOrdered = true,
         });
 
         var writeRowBlock = new ActionBlock<T[]>(row => {
             foreach (var pixel in row.Chunk(stride))
                 pixelWriter.Write(pixel);
+        }, new ExecutionDataflowBlockOptions {
+            EnsureOrdered = true,
         });
 
         processPixelRowBlock.LinkTo(writeRowBlock, new DataflowLinkOptions {

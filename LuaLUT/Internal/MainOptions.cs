@@ -30,6 +30,9 @@ internal class MainOptions
     [Option('d', "depth", Required = false, HelpText = "The depth [z] of the LUT image to generate.")]
     public int? ImageDepth { get; set; }
 
+    [Option('s', "slice", Required = false, HelpText = "The depth slice [z] of the LUT image to generate.")]
+    public int? DepthSlice { get; set; }
+
     [Option('v', "var", Required = false, Separator = '|', HelpText = "An optional list of variables.")]
     public IEnumerable<string> CustomVariables { get; set; }
 

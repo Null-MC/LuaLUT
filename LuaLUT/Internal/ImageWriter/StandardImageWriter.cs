@@ -13,15 +13,19 @@ internal class StandardImageWriter : ImageWriterBase
 {
     private readonly ImageType imageType;
 
+    public int DepthSlice {get; set;}
+
 
     public StandardImageWriter(Stream stream, ImageType imageType) : base(stream)
     {
         this.imageType = imageType;
+
+        DepthSlice = 0;
     }
 
     public override async Task ProcessAsync(string luaScript, CancellationToken token = default)
     {
-        // TODO: add special layout for 3D?
+        // TODO: add special layout for 3D grid?
 
         using var image = CreateImage(ImageWidth, ImageHeight);
 
@@ -42,7 +46,12 @@ internal class StandardImageWriter : ImageWriterBase
                 processor.Initialize();
 
                 for (var x = 0; x < ImageWidth; x++) {
-                    var pixel = processor.ProcessPixel(point.X + x, point.Y);
+                    var pixel = ImageDimensions switch {
+                        3 => processor.ProcessPixel(point.X + x, point.Y, DepthSlice),
+                        2 => processor.ProcessPixel(point.X + x, point.Y),
+                        1 => processor.ProcessPixel(point.X + x),
+                        _ => throw new ApplicationException($"Unsupported dimension count '{ImageDimensions}'!"),
+                    };
 
                     if (PixelFormat is PixelFormat.R_NORM or PixelFormat.R_INT) {
                         var value = Convert.ToSingle((double)pixel[0]);

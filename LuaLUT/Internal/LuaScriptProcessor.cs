@@ -40,7 +40,7 @@ internal class LuaScriptProcessor : IDisposable
 
     public void Initialize()
     {
-        if (Dimensions <= 0 || Dimensions > 3)
+        if (Dimensions is <= 0 or > 3)
             throw new ArgumentOutOfRangeException(nameof(Dimensions), "Image must have between 1 and 3 dimensions!");
 
         context["imageWidth"] = Width;
@@ -65,9 +65,6 @@ internal class LuaScriptProcessor : IDisposable
 
         processPixelFunc = context["processPixel"] as LuaFunction;
         processTexelFunc = context["processTexel"] as LuaFunction;
-
-        //if (processPixelFunc == null && processTexelFunc == null)
-        //    throw new ApplicationException("Failed to load script! No 'processPixel()' or 'processTexel()' function found!");
     }
 
     public object[] ProcessPixel(in int px)
@@ -140,12 +137,4 @@ internal class LuaScriptProcessor : IDisposable
 
         context.DoString(script);
     }
-
-    //private async Task LoadScriptAsync(string localPath)
-    //{
-    //    var script = await Assembly.GetExecutingAssembly()
-    //        .ReadTextAsync($"LuaLUT.LuaScripts.{localPath}");
-
-    //    context.DoString(script);
-    //}
 }
