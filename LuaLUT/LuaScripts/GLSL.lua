@@ -11,7 +11,11 @@ function acos(val)
 end
 
 function clamp(val, min, max)
-	return math.clamp(val, min, max)
+	if vec.isVec(val) then
+		return vec.clamp(val, min, max)
+	else
+		return math.clamp(val, min, max)
+	end
 end
 
 function cos(ang)
@@ -50,12 +54,16 @@ function fract(val)
 	if vec.isVec(val) then
 		return vec.fract(val)
 	else
-		return math.fract(val)
+		return val % 1
 	end
 end
 
 function length(vector)
 	return vec.length(vector)
+end
+
+function lerp(x, y, weight)
+	return mix(x, y, weight)
 end
 
 function max(valA, valB)
@@ -71,7 +79,11 @@ function min(valA, valB)
 end
 
 function mix(x, y, weight)
-	return x * (1.0 - weight) + y * weight
+	if vec.isVec(x) or vec.isVec(y) then
+		return vec.mix(x, y, weight)
+	else
+		return x * (1.0 - weight) + y * weight
+	end
 end
 
 function mod(a, b)
@@ -91,7 +103,7 @@ function rcp(val)
 end
 
 function saturate(val)
-	return math.max(math.min(val, 1), 0)
+	return clamp(val, 0.0, 1.0)
 end
 
 function sin(ang)
