@@ -61,6 +61,7 @@ internal abstract class PixelWriterBase<T>
                 writeAction(pixel[0]);
                 writeAction(pixel[3]);
                 break;
+            case PixelFormat.UNDEFINED:
             default:
                 throw new ApplicationException("Unsupported");
         }

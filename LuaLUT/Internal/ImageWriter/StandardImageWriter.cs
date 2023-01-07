@@ -33,7 +33,7 @@ internal class StandardImageWriter : ImageWriterBase
             // TODO: if integer format, don't use vec4
 
             context.ProcessPixelRowsAsVector4((row, point) => {
-                using var processor = new LuaScriptProcessor {
+                using var processor = new LuaScriptProcessor(Samplers) {
                     IncludedFiles = IncludedFiles,
                     CustomVariables = CustomVariables,
                     Dimensions = ImageDimensions,

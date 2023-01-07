@@ -2,7 +2,12 @@
   "profiles": {
     "LuaLUT": {
       "commandName": "Project",
-      "commandLineArgs": "--script \"D:\\\\MC-Shader\\\\Arc\\\\tools\\\\lua\\\\multiple_scattering.lua\"\r\n--out \"D:\\\\MC-Shader\\\\Arc\\\\src\\\\shaders\\\\textures\\\\\"\r\n--img \"PNG\"\r\n--format \"RGB\"\r\n--type \"HALF_FLOAT\"\r\n-w 32\r\n-h 32\r\n-i \"atmosphere.lua\""
+      "commandLineArgs": "--script \"D:\\\\MC-Shader\\\\Arc\\\\tools\\\\lua\\\\multiple_scattering.lua\"\r\n--out \"D:\\\\MC-Shader\\\\Arc\\\\src\\\\shaders\\\\textures\\\\\"\r\n--img \"PNG\"\r\n--format \"RGB\"\r\n--type \"HALF_FLOAT\"\r\n-w 32\r\n-h 32\r\n-d 2\r\n-s \"../src/shaders/textures/sun_transmission.dat 256 64 2 RGB HALF_FLOAT\"",
+      "workingDirectory": "D:\\MC-Shader\\Arc\\tools\\"
+    },
+    "Test 2": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:\\\\MC-Shader\\\\Arc\\\\tools\\\\clouds_3d.properties\""
     }
   }
 }

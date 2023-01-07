@@ -1,4 +1,5 @@
-﻿using NLua;
+﻿using LuaLUT.Internal.Samplers;
+using NLua;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,17 +18,22 @@ internal class LuaScriptProcessor : IDisposable
     public int Height {get; set;}
     public int Depth {get; set;}
     public int Dimensions {get; set;}
-    public List<string> IncludedFiles {get; set;}
-    public Dictionary<string, object> CustomVariables {get; set;}
+    public IList<string> IncludedFiles {get; set;}
+    public IDictionary<string, object> CustomVariables {get; set;}
+    public LuaSamplers Samplers {get;}
 
 
-    public LuaScriptProcessor()
+    public LuaScriptProcessor(IDictionary<string, ISampler> samplers = null)
     {
         IncludedFiles = new List<string>();
         CustomVariables = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
 
         context = new Lua();
+
+        // TODO: only enable if debug?
         context.UseTraceback = true;
+
+        Samplers = new LuaSamplers(samplers);
 
         Dimensions = 0;
         Width = Height = Depth = 1;
@@ -43,6 +49,7 @@ internal class LuaScriptProcessor : IDisposable
         if (Dimensions is <= 0 or > 3)
             throw new ArgumentOutOfRangeException(nameof(Dimensions), "Image must have between 1 and 3 dimensions!");
 
+        context["samplers"] = Samplers;
         context["imageWidth"] = Width;
         if (Dimensions > 1) context["imageHeight"] = Height;
         if (Dimensions > 2) context["imageDepth"] = Depth;
@@ -51,6 +58,7 @@ internal class LuaScriptProcessor : IDisposable
         LoadScript("GLSL_ops.lua");
         LoadScript("GLSL_vec.lua");
         LoadScript("GLSL_mat.lua");
+        LoadScript("GLSL_samplers.lua");
         LoadScript("GLSL.lua");
 
         if (CustomVariables != null)

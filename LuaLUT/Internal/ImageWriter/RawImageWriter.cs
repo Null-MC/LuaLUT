@@ -30,7 +30,7 @@ internal class RawImageWriter<T> : ImageWriterBase
                 rowSpan[i] = value is T valueT ? valueT : (T)Convert.ChangeType(value, typeof(T));
             }
 
-            using var processor = new LuaScriptProcessor {
+            using var processor = new LuaScriptProcessor(Samplers) {
                 IncludedFiles = IncludedFiles,
                 CustomVariables = CustomVariables,
                 Dimensions = ImageDimensions,

@@ -2,18 +2,30 @@
 using LuaLUT.Internal;
 using LuaLUT.Internal.ImageWriter;
 using LuaLUT.Internal.PixelWriter;
+using LuaLUT.Internal.Samplers;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LuaLUT;
 
 internal class Program
 {
+    private static readonly CancellationTokenSource tokenSource;
+
+
+    static Program()
+    {
+        tokenSource = new CancellationTokenSource();
+    }
+
     private static async Task<int> Main(string[] args)
     {
+        Console.CancelKeyPress += Console_OnCancelKeyPress;
+
         try {
             var parser = Parser.Default.ParseArguments<MainOptions>(args);
             if (parser.Errors.Any()) return 1;
@@ -21,15 +33,23 @@ internal class Program
             await parser.WithParsedAsync(RunOptionsAsync);
             return 0;
         }
+        catch (OperationCanceledException) {
+            Console.WriteLine("Operation cancelled.");
+            return 1;
+        }
         catch (Exception error) {
             Console.WriteLine($"An unhandled exception has occurred! {error.Message}\n{error}");
             return -1;
+        }
+        finally {
+            tokenSource.Dispose();
         }
     }
 
     private static async Task RunOptionsAsync(MainOptions options)
     {
         if (options.Verbose) Console.WriteLine("Verbose output enabled.");
+        var token = tokenSource.Token;
         var timer = Stopwatch.StartNew();
 
         try {
@@ -41,7 +61,7 @@ internal class Program
                 outputFile += Path.GetFileNameWithoutExtension(options.Script.Name)+ext;
             }
 
-            var luaScript = await File.ReadAllTextAsync(options.Script.FullName);
+            var luaScript = await File.ReadAllTextAsync(options.Script.FullName, token);
 
             // Create directory for output file if it doesn't exist
             var outputPath = Path.GetDirectoryName(outputFile);
@@ -88,7 +108,23 @@ internal class Program
                 }
             }
 
-            await writer.ProcessAsync(luaScript);
+            if (options.Samplers.Any()) {
+                foreach (var samplerSpec in options.Samplers) {
+                    var description = new SamplerDescription();
+                    description.Parse(samplerSpec);
+
+                    var sampler = SamplerFactory.Get(description);
+
+                    var name = Path.GetFileNameWithoutExtension(description.Filename) ?? description.Filename;
+                    if (name == null) throw new ApplicationException("Sampler name is undefined!");
+
+                    await sampler.LoadImageAsync(token);
+
+                    writer.Samplers[name] = sampler;
+                }
+            }
+
+            await writer.ProcessAsync(luaScript, token);
             timer.Stop();
 
             Console.WriteLine($"LUT generated successfully! Duration: {timer.Elapsed:g}");
@@ -143,5 +179,14 @@ internal class Program
             ImageType.Raw => ".dat",
             _ => throw new ApplicationException($"Unsupported image type '{imageType}'!")
         };
+    }
+
+    private static void Console_OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+    {
+        //Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Cancelling...");
+        //Console.ResetColor();
+
+        tokenSource.Cancel();
     }
 }
