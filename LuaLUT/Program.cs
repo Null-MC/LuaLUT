@@ -127,6 +127,7 @@ internal class Program
 
             await writer.ProcessAsync(luaScript, token);
 
+            bufferStream.Seek(0, SeekOrigin.Begin);
             await using (var outputStream = File.Open(outputFile, FileMode.Create, FileAccess.Write)) {
                 await bufferStream.CopyToAsync(outputStream, token);
             }
