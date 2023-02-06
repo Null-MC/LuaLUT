@@ -114,6 +114,22 @@ function sin(ang)
 	end
 end
 
+function smoothstep(low, high, frac)
+	if vec.isVec(frac) then
+		return vec.smoothstep(low, high, frac)
+	else
+		return math.smoothstep(low, high, frac)
+	end
+end
+
 function sqrt(val)
 	return math.sqrt(val)
+end
+
+function vec2(val)
+	return vec(val, val)
+end
+
+function vec3(val)
+	return vec(val, val, val)
 end

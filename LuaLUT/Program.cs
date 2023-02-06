@@ -68,9 +68,10 @@ internal class Program
             if (outputPath != null && !Directory.Exists(outputPath))
                 Directory.CreateDirectory(outputPath);
 
-            await using var outputStream = File.Open(outputFile, FileMode.Create, FileAccess.Write);
+            //await using var outputStream = File.Open(outputFile, FileMode.Create, FileAccess.Write);
+            await using var bufferStream = new MemoryStream();
                 
-            var writer = GetImageWriter(outputStream, options);
+            var writer = GetImageWriter(bufferStream, options);
             writer.ImageWidth = options.ImageWidth;
             writer.ImageHeight = options.ImageHeight ?? 1;
             writer.ImageDepth = options.ImageDepth ?? 1;
@@ -125,8 +126,12 @@ internal class Program
             }
 
             await writer.ProcessAsync(luaScript, token);
-            timer.Stop();
 
+            await using (var outputStream = File.Open(outputFile, FileMode.Create, FileAccess.Write)) {
+                await bufferStream.CopyToAsync(outputStream, token);
+            }
+
+            timer.Stop();
             Console.WriteLine($"LUT generated successfully! Duration: {timer.Elapsed:g}");
         }
         catch (Exception error) {
