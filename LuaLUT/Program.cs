@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using NLua.Exceptions;
 
 namespace LuaLUT;
 
@@ -134,6 +135,10 @@ internal class Program
 
             timer.Stop();
             Console.WriteLine($"LUT generated successfully! Duration: {timer.Elapsed:g}");
+        }
+        catch (LuaScriptException error) {
+            Console.WriteLine($"Lua scripting error! {error.Message}");
+            timer.Stop();
         }
         catch (Exception error) {
             Console.WriteLine($"Failed to build LUT! {error.Message}\n{error}");

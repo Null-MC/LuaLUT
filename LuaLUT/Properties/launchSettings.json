@@ -8,6 +8,11 @@
     "Clouds": {
       "commandName": "Project",
       "commandLineArgs": "--script \"D:\\\\MC-Shader\\\\Arc\\\\tools\\\\lua\\\\clouds_3d.lua\"\r\n--out \"D:\\\\MC-Shader\\\\Arc\\\\tools\\\\preview\\\\\"\r\n--img \"PNG\" --format \"RG\" --type HALF_FLOAT\r\n-w 256 -h 256 -d 64 -z 32"
+    },
+    "Noise": {
+      "commandName": "Project",
+      "commandLineArgs": "--script \"D:\\\\MC-Shader\\\\Shrimple\\\\tools\\\\lua\\\\noise.lua\"\r\n--out \"D:\\\\MC-Shader\\\\Shrimple\\\\tools\\\\preview\\\\\"\r\n--img \"PNG\" --format \"RG\" --type UNSIGNED_BYTE\r\n-w 512 -h 512",
+      "workingDirectory": "D:\\\\MC-Shader\\\\Shrimple\\\\tools"
     }
   }
 }

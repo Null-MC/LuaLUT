@@ -29,45 +29,50 @@ internal class StandardImageWriter : ImageWriterBase
 
         using var image = CreateImage(ImageWidth, ImageHeight);
 
-        image.Mutate(context => {
-            // TODO: if integer format, don't use vec4
+        try {
+            image.Mutate(context => {
+                // TODO: if integer format, don't use vec4
 
-            context.ProcessPixelRowsAsVector4((row, point) => {
-                using var processor = new LuaScriptProcessor(Samplers) {
-                    IncludedFiles = IncludedFiles,
-                    CustomVariables = CustomVariables,
-                    Dimensions = ImageDimensions,
-                    Width = ImageWidth,
-                    Height = ImageHeight,
-                    Depth = ImageDepth,
-                    Script = luaScript,
-                };
-
-                processor.Initialize();
-
-                for (var x = 0; x < ImageWidth; x++) {
-                    var pixel = ImageDimensions switch {
-                        3 => processor.ProcessPixel(point.X + x, point.Y, DepthSlice),
-                        2 => processor.ProcessPixel(point.X + x, point.Y),
-                        1 => processor.ProcessPixel(point.X + x),
-                        _ => throw new ApplicationException($"Unsupported dimension count '{ImageDimensions}'!"),
+                context.ProcessPixelRowsAsVector4((row, point) => {
+                    using var processor = new LuaScriptProcessor(Samplers) {
+                        IncludedFiles = IncludedFiles,
+                        CustomVariables = CustomVariables,
+                        Dimensions = ImageDimensions,
+                        Width = ImageWidth,
+                        Height = ImageHeight,
+                        Depth = ImageDepth,
+                        Script = luaScript,
                     };
 
-                    if (PixelFormat is PixelFormat.R_NORM or PixelFormat.R_INT) {
-                        var value = Convert.ToSingle((double)pixel[0]);
-                        row[point.X + x].X = value;
-                        row[point.X + x].Y = value;
-                        row[point.X + x].Z = value;
+                    processor.Initialize();
+
+                    for (var x = 0; x < ImageWidth; x++) {
+                        var pixel = ImageDimensions switch {
+                            3 => processor.ProcessPixel(point.X + x, point.Y, DepthSlice),
+                            2 => processor.ProcessPixel(point.X + x, point.Y),
+                            1 => processor.ProcessPixel(point.X + x),
+                            _ => throw new ApplicationException($"Unsupported dimension count '{ImageDimensions}'!"),
+                        };
+
+                        if (PixelFormat is PixelFormat.R_NORM or PixelFormat.R_INT) {
+                            var value = Convert.ToSingle((double)pixel[0]);
+                            row[point.X + x].X = value;
+                            row[point.X + x].Y = value;
+                            row[point.X + x].Z = value;
+                        }
+                        else {
+                            if (pixel.Length >= 1) row[point.X + x].X = Convert.ToSingle((double)pixel[0]);
+                            if (pixel.Length >= 2) row[point.X + x].Y = Convert.ToSingle((double)pixel[1]);
+                            if (pixel.Length >= 3) row[point.X + x].Z = Convert.ToSingle((double)pixel[2]);
+                            if (pixel.Length >= 4) row[point.X + x].W = Convert.ToSingle((double)pixel[3]);
+                        }
                     }
-                    else {
-                        if (pixel.Length >= 1) row[point.X + x].X = Convert.ToSingle((double)pixel[0]);
-                        if (pixel.Length >= 2) row[point.X + x].Y = Convert.ToSingle((double)pixel[1]);
-                        if (pixel.Length >= 3) row[point.X + x].Z = Convert.ToSingle((double)pixel[2]);
-                        if (pixel.Length >= 4) row[point.X + x].W = Convert.ToSingle((double)pixel[3]);
-                    }
-                }
+                });
             });
-        });
+        }
+        catch (AggregateException error) {
+            throw error.InnerException ?? error;
+        }
 
         await Stream.FlushAsync(token);
 
