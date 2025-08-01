@@ -13,14 +13,14 @@ internal class StandardImageWriter : ImageWriterBase
 {
     private readonly ImageType imageType;
 
-    public int DepthSlice {get; set;}
+    public int? SliceX {get; set;}
+    public int? SliceY {get; set;}
+    public int? SliceZ {get; set;}
 
 
     public StandardImageWriter(Stream stream, ImageType imageType) : base(stream)
     {
         this.imageType = imageType;
-
-        DepthSlice = 0;
     }
 
     public override async Task ProcessAsync(string luaScript, CancellationToken token = default)
@@ -47,12 +47,29 @@ internal class StandardImageWriter : ImageWriterBase
                     processor.Initialize();
 
                     for (var x = 0; x < ImageWidth; x++) {
-                        var pixel = ImageDimensions switch {
-                            3 => processor.ProcessPixel(point.X + x, point.Y, DepthSlice),
-                            2 => processor.ProcessPixel(point.X + x, point.Y),
-                            1 => processor.ProcessPixel(point.X + x),
-                            _ => throw new ApplicationException($"Unsupported dimension count '{ImageDimensions}'!"),
-                        };
+                        object[] pixel;
+
+                        switch (ImageDimensions) {
+                            case 3:
+                                if (SliceX.HasValue) {
+                                    pixel = processor.ProcessPixel(SliceX.Value, point.X + x, point.Y);
+                                }
+                                else if (SliceY.HasValue) {
+                                    pixel = processor.ProcessPixel(point.X + x, SliceY.Value, point.Y);
+                                }
+                                else {
+                                    pixel = processor.ProcessPixel(point.X + x, point.Y, SliceZ ?? 0);
+                                }
+                                break;
+                            case 2:
+                                pixel = processor.ProcessPixel(point.X + x, point.Y);
+                                break;
+                            case 1:
+                                pixel = processor.ProcessPixel(point.X + x);
+                                break;
+                            default:
+                                throw new ApplicationException($"Unsupported dimension count '{ImageDimensions}'!");
+                        }
 
                         if (PixelFormat is PixelFormat.R_NORM or PixelFormat.R_INT) {
                             var value = Convert.ToSingle((double)pixel[0]);

@@ -13,6 +13,11 @@
       "commandName": "Project",
       "commandLineArgs": "--script \"D:\\\\MC-Shader\\\\Shrimple\\\\tools\\\\lua\\\\noise.lua\"\r\n--out \"D:\\\\MC-Shader\\\\Shrimple\\\\tools\\\\preview\\\\\"\r\n--img \"PNG\" --format \"RG\" --type UNSIGNED_BYTE\r\n-w 512 -h 512",
       "workingDirectory": "D:\\\\MC-Shader\\\\Shrimple\\\\tools"
+    },
+    "Detail-Atlas": {
+      "commandName": "Project",
+      "commandLineArgs": "--script \"D:\\\\MC-Shader\\\\Shrimple\\\\tools\\\\lua\\\\detail-atlas.lua\"\r\n--out \"D:\\\\MC-Shader\\\\Shrimple\\\\tools\\\\preview\\\\\"\r\n--img \"PNG\" --format \"RGB\" --type UNSIGNED_BYTE\r\n-w 256 -h 256",
+      "workingDirectory": "D:\\\\MC-Shader\\\\Shrimple\\\\tools"
     }
   }
 }

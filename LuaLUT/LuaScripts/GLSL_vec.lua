@@ -444,6 +444,7 @@ end
 apiTable.max = makeBinaryOp  (math.max)
 apiTable.min = makeBinaryOp  (math.min)
 apiTable.mix = makeTertiaryOp(math.mix)
+--apiTable.mod = makeUnaryOp   (math.mod)
 apiTable.modf = function(a)
 	local intPart = {}
 	local fracPart = {}

@@ -90,12 +90,24 @@ function mod(a, b)
 	return a % b
 end
 
+function modf(a, b)
+	if vec.isVec(a) or vec.isVec(b) then
+		return vec.modf(a, b)
+	else
+		return math.modf(a, b)
+	end
+end
+
 function normalize(val)
 	return vec.normalize(val)
 end
 
 function pow(val, power)
-	return val ^ power
+	if vec.isVec(val) or vec.isVec(power) then
+		return vec.pow(val, power)
+	else
+		return val ^ power
+	end
 end
 
 function rcp(val)
@@ -132,4 +144,8 @@ end
 
 function vec3(val)
 	return vec(val, val, val)
+end
+
+function vec4(val)
+	return vec(val, val, val, val)
 end

@@ -30,8 +30,14 @@ internal class MainOptions
     [Option('d', "depth", Required = false, HelpText = "The depth [z] of the LUT image to generate.")]
     public int? ImageDepth { get; set; }
 
-    [Option('z', "slice", Required = false, HelpText = "The depth slice [z] of the LUT image to generate.")]
-    public int? DepthSlice { get; set; }
+    [Option('x', Required = false, HelpText = "The Y/Z slice [x] of the LUT image to generate.")]
+    public int? SliceX { get; set; }
+
+    [Option('y', Required = false, HelpText = "The X/Z slice [y] of the LUT image to generate.")]
+    public int? SliceY { get; set; }
+
+    [Option('z', "slice", Required = false, HelpText = "The X/Y slice [z] of the LUT image to generate.")]
+    public int? SliceZ { get; set; }
 
     [Option('v', "var", Required = false, Separator = '|', HelpText = "An optional list of variables.")]
     public IEnumerable<string> CustomVariables { get; set; }

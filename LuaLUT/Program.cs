@@ -3,13 +3,13 @@ using LuaLUT.Internal;
 using LuaLUT.Internal.ImageWriter;
 using LuaLUT.Internal.PixelWriter;
 using LuaLUT.Internal.Samplers;
+using NLua.Exceptions;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NLua.Exceptions;
 
 namespace LuaLUT;
 
@@ -76,6 +76,11 @@ internal class Program
             writer.ImageWidth = options.ImageWidth;
             writer.ImageHeight = options.ImageHeight ?? 1;
             writer.ImageDepth = options.ImageDepth ?? 1;
+
+            if (options.ImageDepth.HasValue) {
+                if (options.SliceX.HasValue || options.SliceY.HasValue)
+                    writer.ImageHeight = writer.ImageDepth;
+            }
 
             writer.ImageDimensions = 1;
             if (options.ImageHeight.HasValue)
@@ -154,7 +159,9 @@ internal class Program
 
         if (imageType != ImageType.Raw)
             return new StandardImageWriter(outputStream, imageType) {
-                DepthSlice = options.DepthSlice ?? 0,
+                SliceX = options.SliceX,
+                SliceY = options.SliceY,
+                SliceZ = options.SliceZ,
                 PixelFormat = pixelFormat,
                 PixelType = pixelType,
             };
