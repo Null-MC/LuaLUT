@@ -13,7 +13,7 @@ end
 Then run LuaLUT using the following command to generate a LUT.png image.
 
 ```
-lualut -s "lut.lua" -i "PNG" -f "RGB" -t "BYTE" -w 128 -h 128
+lualut --script "src/lut.lua" --out "publish/LUT.png" --img "PNG" --format "RGB" --type "UNSIGNED_BYTE" -w 128 -h 128
 ```
 
 ## Custom Variables
